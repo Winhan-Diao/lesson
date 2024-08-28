@@ -7,9 +7,9 @@ int main() {
     std::cout << "将计算" << a << "x² + " << b << "x + " << c << " = 0.\r\n";
     auto [isReal, ans1, ans2] = quadraticSolution(a, b, c);
     if (isReal) {
-        std::cout << "答案： (" << ans1.real() << ", " << ans2.real() << ")" << "\r\n";
+        std::cout << "答案: (" << ans1.real() << ", " << ans2.real() << ")" << "\r\n";
     } else {
-        std::cout << "答案为复数： (" << ans1 << ", " << ans2 << ")" << "\r\n";
+        std::cout << "答案为复数(r, i): (" << ans1 << ", " << ans2 << ")" << "\r\n";
     }
     return 0;
 }
