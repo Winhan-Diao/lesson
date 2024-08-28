@@ -3,7 +3,7 @@
 #include <cstring>
 
 void GetStrings0(char**& dest, const char* const source[], int n)	// 11. 第一个参数为什么要传递二级指针的引用？
-{
+{																	// 11A: 将修改指针自身值
 	dest = new char* [n];
 	if (dest == NULL) return;
 	dest[0] = new char[n * NUM];
@@ -14,12 +14,13 @@ void GetStrings0(char**& dest, const char* const source[], int n)	// 11. 第一�
 		return;
 	}
 	for (int i = 1; i < n; i++)										// 12. 请指出本循环的作用
-		dest[i] = dest[i - 1] + NUM;
+		dest[i] = dest[i - 1] + NUM;								// 12A: 赋地址值
 	for (int i = 0; i < n; i++)
 	{
 		strncpy(dest[i], source[i], NUM);							// 13. 此处为什么要用strncpy函数？
+																	// 13A?: 防止src数组中有些字符串结尾不是\0时，不必要复制或复制溢出内存
 		dest[i][NUM - 1] = '\0';									// 14. 此语句的作用是什么？
-	}
+	}																// 14A: 强制dest数组中每个字符串以\0收尾
 }
 
 void GetStrings1(char**& dest, const char* const source[], int n)
@@ -48,7 +49,7 @@ void GetStrings2(char**& dest, const char* const source[], int n)
 }
 
 void FreeStrings(char**& strs, int n, bool flag)					// 15. 第一个参数为什么要传递二级指针的引用？
-{
+{																	// 15A： 把strs值在最后设置为NULL
 	if (strs != NULL)
 	{
 		if (flag)
