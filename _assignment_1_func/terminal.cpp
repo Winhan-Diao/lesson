@@ -1,13 +1,19 @@
 #include "terminal.h"
 int main() {
-    DecaiableDoubleComplex a, b, c;
-    std::cout << "解决 Ax² + Bx + C = 0." << "\r\n";
-    std::cout << "请依次输入A、B、C." << "\r\n";
-    std::cout << "支持格式1.r; 2.(r, i)" << "\r\n";
-    std::cin >> a >> b >> c;
-    std::cout << "将计算" << a << "x² + " << b << "x + " << c << " = 0.\r\n";
-    auto [ans1, ans2] = quadraticSolution(a, b, c);
-    std::cout << "答案: (" <<ans1 << ", " << ans2 << ")" << "\r\n";
+
+    std::filesystem::path exePath = std::filesystem::current_path();
+    std::cout << exePath << std::endl;
+    std::ofstream ofs{".\\test.txt", std::ios::trunc | std::ios::out};
+    if (ofs.is_open()) {
+        std::cout << "ofs is opened" << "\r\n";
+    }
+
+    do {
+        VerboseStreamSolver(std::cin, ofs)();
+    } while ((std::cout << "输入R再运行.\r\n", std::cin >> std::ws, std::getchar() == ('R' || 'r')));
+    
+    ofs.close();
+
     return 0;
 }
 

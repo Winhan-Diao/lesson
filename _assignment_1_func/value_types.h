@@ -17,8 +17,8 @@ public:
     bool isReal() const;
 };
 
-template<class CharT, class Traits>
-std::basic_ostream<CharT, Traits>& operator<<( std::basic_ostream<CharT, Traits>& os, const DecaiableDoubleComplex& z) {
+template<class CharT1, class Traits1>
+std::basic_ostream<CharT1, Traits1>& operator<<( std::basic_ostream<CharT1, Traits1>& os, const DecaiableDoubleComplex& z) {
     if (z.isReal()) {
         return os << z.getReal();
     } else {
@@ -26,7 +26,7 @@ std::basic_ostream<CharT, Traits>& operator<<( std::basic_ostream<CharT, Traits>
     }
 }
 
-template<class CharT, class Traits>
-std::basic_istream<CharT, Traits>& operator>>( std::basic_istream<CharT, Traits>& is, DecaiableDoubleComplex& z) {
+template<class CharT1, class Traits1>
+std::basic_istream<CharT1, Traits1>& operator>>( std::basic_istream<CharT1, Traits1>& is, DecaiableDoubleComplex& z) {
     return is >> z.getComplex();
 }
