@@ -4,7 +4,7 @@
 		{
 			"type": "cppbuild",
 			"label": "C/C++: g++.exe build active file",
-			"command": "C:\\Program Files\\CodeBlocks\\MinGW\\bin\\g++.exe",
+			"command": "D:\\Develop\\mingw64\\bin\\g++.exe",
 			"args": [
 				"-std=c++17",
 				"-fdiagnostics-color=always",

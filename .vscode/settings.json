@@ -71,6 +71,11 @@
         "xstring": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "variant": "cpp",
+        "random": "cpp",
+        "numbers": "cpp",
+        "span": "cpp",
+        "text_encoding": "cpp"
     }
 }
