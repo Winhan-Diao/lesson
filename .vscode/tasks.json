@@ -8,16 +8,14 @@
 			"args": [
 				"-std=c++17",
 				"-fdiagnostics-color=always",
-				"-fpermissive",
+				// "-fpermissive",
 				"-g",
 				"${fileDirname}\\*.cpp",
 				"-o",
-				"${fileDirname}\\${fileBasenameNoExtension}.exe",
-				// "&&",
-				// "${fileDirname}\\${fileBasenameNoExtension}.exe"
+				"${fileDirname}\\${fileBasenameNoExtension}.exe"
 			],	
 			"options": {
-				"cwd": "${fileDirname}"
+				// "cwd": "${workspaceFolder}"
 			},
 			"problemMatcher": [
 				"$gcc"
@@ -26,7 +24,7 @@
 				"kind":"build",
 				"isDefault": true
 			},
-			"detail": "compiler: C:\\Program Files\\CodeBlocks\\MinGW\\bin\\g++.exe"
+			"detail": "compiler: D:\\Develop\\mingw64\\bin\\g++.exe"
 		}
 	]
 }

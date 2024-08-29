@@ -1,16 +1,14 @@
 #include "terminal.h"
 int main() {
 
-    std::filesystem::path exePath = std::filesystem::current_path();
-    std::cout << exePath << std::endl;
-    std::ofstream ofs{".\\test.txt", std::ios::trunc | std::ios::out};
+    std::ofstream ofs{".\\test.txt", std::ios::trunc | std::ios::out | std::ios::binary};
     if (ofs.is_open()) {
         std::cout << "ofs is opened" << "\r\n";
     }
 
     do {
-        VerboseStreamSolver(std::cin, ofs)();
-    } while ((std::cout << "输入R再运行.\r\n", std::cin >> std::ws, std::getchar() == ('R' || 'r')));
+        StreamSolver(std::cin, ofs)();
+    } while ((std::cout << "输入R再运行.\r\n", std::cin >> std::ws, std::getchar() == 'R'));
     
     ofs.close();
 
