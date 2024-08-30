@@ -3,6 +3,10 @@
 DecaiableDoubleComplex::operator std::complex<double>() const {
     return z;
 }
+DecaiableDoubleComplex& DecaiableDoubleComplex::operator= (const DecaiableDoubleComplex& ddc) {
+    z = ddc.z;
+    return *this;
+}
 double DecaiableDoubleComplex::getImaginary() const {
     return z.imag();
 }

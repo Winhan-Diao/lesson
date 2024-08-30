@@ -9,6 +9,7 @@ public:
     DecaiableDoubleComplex(double d): z{d} {}
     DecaiableDoubleComplex(const std::complex<double>& z): z{z} {}
     DecaiableDoubleComplex(std::complex<double>&& z): z{std::move(z)} {}
+    DecaiableDoubleComplex& operator= (const DecaiableDoubleComplex& ddc);
     operator std::complex<double>() const;
     double getImaginary() const;
     double getReal() const;
