@@ -74,6 +74,7 @@ struct VerboseStreamSolver: public StreamSolver<CharT1, Traits1, CharT2, Traits2
 template <class InputIt, class OutputIt>
 struct FlatContainerToPairSolver: public Solver {
     bool preInOnceFlag{true};
+    bool logFlag;
     InputIt inTemp;
     OutputIt outTemp;
 protected:
@@ -81,12 +82,12 @@ protected:
     InputIt inLast;
     OutputIt outFirst;
 public:
-    FlatContainerToPairSolver(InputIt inFirst, InputIt inLast, OutputIt outFirst): inTemp(inFirst), outTemp(outFirst), inFirst(inFirst), inLast(inLast), outFirst(outFirst) {}
+    FlatContainerToPairSolver(InputIt inFirst, InputIt inLast, OutputIt outFirst, bool logFlag = false): logFlag(logFlag), inTemp(inFirst), outTemp(outFirst), inFirst(inFirst), inLast(inLast), outFirst(outFirst) {}
     void preIn() override {
         if (preInOnceFlag) {
             preInOnceFlag = false;
             if ((inLast - inFirst) % 3 != 0) {
-                throw new BadDistanceException{};
+                throw BadDistanceException{};
             }
         }
     }
@@ -103,6 +104,7 @@ public:
     }
     void output() override {
         *outTemp = std::make_pair(ans1, ans2);
+        if (logFlag) std::cout << "{" << "ans1: " << ans1 << "; ans2: " << ans2 << "}" << "\r\n"; 
         ++outTemp;
     }
     void postOut() override {

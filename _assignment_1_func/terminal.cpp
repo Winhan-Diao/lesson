@@ -3,7 +3,7 @@ int main() {
     std::complex<double> arr[][3] = {{{0, -4}, 2, 3}, {2, 1, 4}, {5, 0, 8}, {-1, {1, 3}, 7}, {1, -5, {1, -1}}};
     std::complex<double> *flatArr = reinterpret_cast<decltype(flatArr)>(arr);
     std::array<std::pair<DecaiableDoubleComplex, DecaiableDoubleComplex>, 5> ddcPairArr;
-    FlatContainerToPairSolver{flatArr, flatArr + 5*3, ddcPairArr.begin()}();
+    FlatContainerToPairSolver{flatArr, flatArr + 5*3, ddcPairArr.begin(), true}();
 
     return 0;
 }
