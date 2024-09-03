@@ -82,7 +82,7 @@ int LinkedInt::getValue() const noexcept {
 
 unsigned LinkedInt::getSize() const noexcept {
     int size = 0;
-    traverse([&size](){++size;});
+    runnableTraverse([&size](){++size;});
     return size;
 }
 
@@ -93,6 +93,24 @@ LinkedInt::~LinkedInt() noexcept {
 
 
 std::ostream& operator<< (std::ostream& os, const LinkedInt& linkedInt) {
-    os << const_cast<const LinkedInt&>(linkedInt).getValue() << ' ';
-    linkedInt.traverse([](LinkedInt linkedInt){});
+    linkedInt.consumerTraverse([&os](const LinkedInt& _linkedInt){
+        os << _linkedInt.getValue() << ' ';
+    });
+    return os;
+}
+
+std::istream& operator>> (std::istream& is, LinkedInt& linkedInt) {
+    delete linkedInt.next;
+    is >> linkedInt.value;
+    if (is.good()) {
+        linkedInt.consumerTraverse([&is](LinkedInt& _linkedInt){
+            int tmp;
+            is >> tmp;
+            if (is.good()) {
+                _linkedInt.add(tmp);
+            }
+            return is.good();
+        });
+    }
+    return is;
 }

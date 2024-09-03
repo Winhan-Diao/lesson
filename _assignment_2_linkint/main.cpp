@@ -18,5 +18,14 @@ int main() {
     linkedInt5.insert(3, 2091);
 
     std::cout << linkedInt5.getSize() << "\r\n";
+    std::cout << linkedInt5 << "\r\n";
+    std::cout << linkedInt4 << "\r\n";
+
+    std::string s;
+    std::cin >> linkedInt1;
+    std::cout << "linkedint " << linkedInt1 << "\r\n";
+    std::cin.clear();
+    std::cin >> s;
+    std::cout << "string " << s << "\r\n";
     return 0;
 }
