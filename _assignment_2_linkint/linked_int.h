@@ -3,11 +3,13 @@
 #include <iostream>
 #include <exception>
 #include "traits.h"
+#include "linked_int_exceptions.h"
 
 // No head
 class LinkedInt {
 private:
     int value{0};
+    bool valid{true};
     LinkedInt *next{nullptr};
 protected:
 
@@ -26,19 +28,23 @@ public:
     template <class T, typename = std::enable_if_t<is_consumer<T, LinkedInt&>::value>>
     void consumerTraverse(T&& consumer);
 
-    void add(int value) throw();
+    void add(int value) noexcept;
     void setValue(int value);
     void insert(unsigned position, int value);
-    int& getValue() noexcept;
-    int getValue() const noexcept;
+    int& getValue();
+    int getValue() const;
     unsigned getSize() const noexcept;
+    // Return a pointer to the first valid node
+    LinkedInt *remove(unsigned position);
+    void removeAll() noexcept;
 
     ~LinkedInt() noexcept;
 
+    friend std::ostream& operator<< (std::ostream& os, const LinkedInt& linkedInt);
     friend std::istream& operator>> (std::istream& is, LinkedInt& linkedInt);
 };
-
 std::ostream& operator<< (std::ostream& os, const LinkedInt& linkedInt);
+std::istream& operator>> (std::istream& is, LinkedInt& linkedInt);
 
 // ----------------------
 //      definition
@@ -81,5 +87,5 @@ void LinkedInt::consumerTraverse(T&& consumer) {
         this->next->consumerTraverse(std::forward<T>(consumer));
 }
 
-
+#include "linked_int_functions.hpp"
 #endif
