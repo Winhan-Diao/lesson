@@ -102,6 +102,11 @@ unsigned LinkedInt::getSize() const noexcept {
     return size;
 }
 
+const LinkedInt *LinkedInt::getNext() const {
+    if (!valid) throw AccessInvalidNodeException{};
+    return next;
+}
+
 LinkedInt *LinkedInt::remove(unsigned position) {
     if (position) {
         if (this->next) {

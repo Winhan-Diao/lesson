@@ -29,12 +29,7 @@ using remove_cv_ref_ptr_ptrref_t = typename remove_cv_ref_ptr_ptrref<T>::type;
 
 template<class T>
 struct ptr_to_ref_while_forwarding {
-    using type = T&&;
-};
-
-template<class T>
-struct ptr_to_ref_while_forwarding<T&> {
-    using type = T&;
+    using type = std::conditional_t<std::is_lvalue_reference_v<T>, T, T&&>;
 };
 
 template<class T>
@@ -60,8 +55,8 @@ struct ptr_to_ref_while_forwarding<T *const&> {
 /*
 expected behavior:
 In Arguments List -> In Function Body (-> Derefernce To If Pointer) -> As Return Type
-T&& ->T -> T&
-const T&& -> const T -> const T&
+T&& ->T -> T&&
+const T&& -> const T -> const T&&
 T& -> T& -> T&
 const T& -> const T& -> const T&
 T*&& -> T* (-> T) -> T&

@@ -62,6 +62,6 @@ int main() {
 
     Append(linkedInt1c, 66);
 
-    std::cout << linkedInt1c << "\r\n";
+    ShowList(linkedInt1c);
     return 0;
 }

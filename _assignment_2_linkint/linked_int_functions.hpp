@@ -29,7 +29,15 @@ unsigned NumNodes(_OfLinkedInt&& ofLinkedInt) {
 
 template <class _OfLinkedInt, typename>  
 void ShowList(_OfLinkedInt&& ofLinkedInt, std::ostream& os) {
-    os << toReference(ofLinkedInt);
+    os << "NON-HEAD -> ";
+    toReference(ofLinkedInt).consumerTraverse([&os](const LinkedInt& _linkedInt){
+        os << _linkedInt.getValue();
+        if (_linkedInt.getNext()) {
+            os << " -> ";
+        } else {
+            os << " -> NULL";
+        }
+    });
 }
 
 

@@ -34,6 +34,8 @@ public:
     int& getValue();
     int getValue() const;
     unsigned getSize() const noexcept;
+    // Dangerous to handle manually!
+    const LinkedInt *getNext() const;
     // Return a pointer to the first valid node
     LinkedInt *remove(unsigned position);
     void removeAll() noexcept;
