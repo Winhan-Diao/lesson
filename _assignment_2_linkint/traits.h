@@ -20,12 +20,42 @@ public:
 };
 
 template <class T>
-struct clean_type {
+struct remove_cv_ref_ptr_ptrref {
     using type = std::decay_t<std::remove_pointer_t<std::decay_t<T>>>;
 };
 
 template <class T>
-using clean_type_t = typename clean_type<T>::type;
+using remove_cv_ref_ptr_ptrref_t = typename remove_cv_ref_ptr_ptrref<T>::type;
+
+template<class T>
+struct ptr_to_ref_while_forwarding {
+    using type = T&&;
+};
+
+template<class T>
+struct ptr_to_ref_while_forwarding<T&> {
+    using type = T&;
+};
+
+template<class T>
+struct ptr_to_ref_while_forwarding<T *> {
+    using type = std::add_lvalue_reference_t<T>;
+};
+
+template<class T>
+struct ptr_to_ref_while_forwarding<T *&> {
+    using type = std::add_lvalue_reference_t<T>;
+};
+
+template<class T>
+struct ptr_to_ref_while_forwarding<T *const> {
+    using type = std::add_lvalue_reference_t<T>;
+};
+
+template<class T>
+struct ptr_to_ref_while_forwarding<T *const&> {
+    using type = std::add_lvalue_reference_t<T>;
+};
 
 /*
 expected behavior:
@@ -40,8 +70,8 @@ T*const -> T*const (-> T) -> T&
 const T*&& -> const T* (-> const T) -> const T&
 const T*& -> const T* (-> const T) -> const T&
 */
-template <class T, class U = std::remove_pointer_t<std::remove_reference_t<T>>>
-constexpr U& toReference(T&& t) {
+template <class T, class U = typename ptr_to_ref_while_forwarding<T>::type>
+constexpr U toReference(T&& t) {
     if constexpr (std::is_pointer_v<std::remove_reference_t<T>>) {
         return *t;
     } else {
