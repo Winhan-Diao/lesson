@@ -77,6 +77,12 @@
         "numbers": "cpp",
         "span": "cpp",
         "text_encoding": "cpp",
-        "any": "cpp"
+        "any": "cpp",
+        "condition_variable": "cpp",
+        "ratio": "cpp",
+        "mutex": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
     }
 }
