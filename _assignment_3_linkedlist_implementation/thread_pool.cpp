@@ -15,8 +15,15 @@ ThreadPool::ThreadPool(size_t threadCounts): threadCounts{threadCounts} {
                     tasksCompound = this->tasksCompounds.DeleteCurNode();
                 }
                 tasksCompound.GoTop();
-                for (int i = 0; i < tasksCompound.NumNodes(); ++i, tasksCompound.Skip()) {
-                    tasksCompound.CurData()();
+                try {
+                    for (int i = 0; i < tasksCompound.NumNodes(); ++i, tasksCompound.Skip()) {
+                        tasksCompound.CurData()();
+                    }
+                } catch (const std::exception& e) {
+                    std::cerr << "An Exception is caught at thread " << std::this_thread::get_id() << "\r\n"; 
+                    std::cerr << "what(): " << e.what() << "\r\n";
+                } catch (...) {
+                    std::cerr << "An Unknown Exception caught at thread " << std::this_thread::get_id() << "\r\n"; 
                 }
             }
         });
