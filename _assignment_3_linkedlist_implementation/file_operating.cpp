@@ -1,5 +1,10 @@
 #include "file_operating.h"
 
+void createFolder(const std::string& folderName) {
+    if (!CreateDirectoryA(folderName.c_str(), NULL) && GetLastError() != ERROR_ALREADY_EXISTS)
+        throw std::runtime_error{"Failed to create folder."};
+}
+
 // both paths shall exist
 void copyFiles(std::string sourcePath, std::string destPath, std::string wildCardMatching) {
     if (sourcePath.back() != '\\' && sourcePath.back() != '/')
