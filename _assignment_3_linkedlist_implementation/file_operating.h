@@ -45,7 +45,7 @@ inline std::string getCurrentAbsolutePath() {
 
 inline void createFolder(const std::string& folderName) {
     if (!CreateDirectoryA(folderName.c_str(), NULL) && GetLastError() != ERROR_ALREADY_EXISTS)
-        std::cerr << "Failed to create folder." << "\r\n";
+        throw std::runtime_error{"Failed to create folder."};
 }
 
 template <class F, typename>
@@ -55,7 +55,7 @@ void readHashInfo(F&& hashInfoConsumer, std::string targetPath, std::string wild
     WIN32_FIND_DATAA findFileDataA;
     HANDLE hFind = FindFirstFileA((targetPath + wildCardMatching).c_str(), &findFileDataA);
     if (hFind == INVALID_HANDLE_VALUE) {
-        std::cerr << "Fail to find any file at " << targetPath << "; with error code " << GetLastError() << "\r\n";
+        throw std::runtime_error{"Fail to find any file at "s + targetPath + "; with Windows error code "s + std::to_string(GetLastError())};
         return;
     }
     std::string fileNameWithAbsPath;
@@ -69,7 +69,7 @@ void readHashInfo(F&& hashInfoConsumer, std::string targetPath, std::string wild
                 ifs.read(&buffer[0], size);
                 hashInfoConsumer(std::move(fileNameWithAbsPath), std::hash<std::string>{}(buffer));
             } else {
-                std::cerr << "std::ifstream failed to load a file" << "\r\n";
+                throw std::runtime_error{"std::ifstream failed to load a file"};
             }
         }
     } while (FindNextFileA(hFind, &findFileDataA));
