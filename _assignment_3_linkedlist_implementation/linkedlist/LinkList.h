@@ -48,16 +48,16 @@ public:
 	Node<T> *Append(const T &t);				// 追加一个结点成为新的尾结点
 
 	void FreeList();							// 释放链表中的所有结点
-	T DeleteCurNode() throw();				// 删除当前结点，其下一个结点（成为新的当前结点），值返回被删结点数据域数值
-	T ModifyData(const T &t) throw();		// 修改(替换)当前结点的数据域数值
+	T DeleteCurNode() ;				// 删除当前结点，其下一个结点（成为新的当前结点），值返回被删结点数据域数值
+	T ModifyData(const T &t) ;		// 修改(替换)当前结点的数据域数值
 
 	int NumNodes() const;						// 返回结点数
 	int CurPos() const;							// 返回当前结点的序号（-1表示无当前结点）
 	Node<T> *CurNode();							// 返回当前结点的地址（NULL表示无当前结点）
-	T & CurData() throw();					// 引用返回当前结点数据域成员，函数调用表达式可做左值
+	T & CurData() ;					// 引用返回当前结点数据域成员，函数调用表达式可做左值
 
 	Node<T> *GoTop(), *Go(int n), *GoBottom();	// 当前结点绝对定位：首结点、第n个结点(n从0起)、尾结点
-	Node<T> *Skip(int n=1)  throw();			// 当前结点相对定位（n可为负数），默认n为1表示下一个结点
+	Node<T> *Skip(int n=1)  ;			// 当前结点相对定位（n可为负数），默认n为1表示下一个结点
 	template <typename TYPE> Node<T> *Locate(const TYPE &x, bool newsearch=false); // 当前结点依条件（给定TYPE类型）定位
 
 	template <typename TYPE> void Sort(const TYPE &x, bool ascending=true);	// 根据TYPE类型排序（升序或降序）
@@ -267,7 +267,7 @@ void LinkList<T>::FreeList()					// 释放链表中的所有结点
 }
 
 template <typename T>
-T LinkList<T>::DeleteCurNode() throw()		// 删除当前结点，其下一个结点（成为新的当前结点），值返回被删结点数据域数值
+T LinkList<T>::DeleteCurNode() 		// 删除当前结点，其下一个结点（成为新的当前结点），值返回被删结点数据域数值
 {
 	if(cur_node==NULL || head==NULL)
 		throw -1;
@@ -295,7 +295,7 @@ T LinkList<T>::DeleteCurNode() throw()		// 删除当前结点，其下一个结�
 }
 
 template <typename T>
-T LinkList<T>::ModifyData(const T &t) throw()// 修改(替换)当前结点的数据域数值
+T LinkList<T>::ModifyData(const T &t) // 修改(替换)当前结点的数据域数值
 {
 	if(cur_node==NULL)
 		throw -1;
@@ -331,7 +331,7 @@ Node<T> *LinkList<T>::CurNode()					// 返回当前结点的地址（NULL表示�
 }
 
 template <typename T>
-T & LinkList<T>::CurData() throw()			// 引用返回当前结点数据域成员，函数调用表达式可做左值
+T & LinkList<T>::CurData() 			// 引用返回当前结点数据域成员，函数调用表达式可做左值
 {
 	if(cur_node!=NULL)
 		return cur_node->data;
@@ -371,7 +371,7 @@ Node<T> *LinkList<T>::GoBottom()				// 当前结点绝对定位：首结点、�
 }
 
 template <typename T>
-Node<T> *LinkList<T>::Skip(int n) throw()	// 当前结点相对定位（n可为负数），默认n为1表示下一个结点
+Node<T> *LinkList<T>::Skip(int n) 	// 当前结点相对定位（n可为负数），默认n为1表示下一个结点
 {
 	if(cur_node == NULL)
 		throw -1;

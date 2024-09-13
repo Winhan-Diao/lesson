@@ -20,15 +20,15 @@ int main() {
 
     LinkList<std::function<void()>> linkedTasksCompound1;
     linkedTasksCompound1.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_psd"s));
-    linkedTasksCompound1.Append(std::bind(&CopyFilesTraversing::operator(), std::move(CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_psd"s, "*.psd"s})));
-    linkedTasksCompound1.Append(std::bind(&DeleteFilesTraversing::operator(), std::move(DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.psd"s})));
+    linkedTasksCompound1.Append(std::bind(&CopyFilesTraversing::operator(), CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_psd"s, "*.psd"s}));
+    linkedTasksCompound1.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.psd"s}));
     linkedTasksCompound1.Append([]{std::cout << "move psd finifhed." << "\r\n";});
 
 
     LinkList<std::function<void()>> linkedTasksCompound2;
     linkedTasksCompound2.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_zip"s));
-    linkedTasksCompound2.Append(std::bind(&CopyFilesTraversing::operator(), std::move(CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_zip"s, "*.zip"s})));
-    linkedTasksCompound2.Append(std::bind(&DeleteFilesTraversing::operator(), std::move(DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.zip"s})));
+    linkedTasksCompound2.Append(std::bind(&CopyFilesTraversing::operator(), CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_zip"s, "*.zip"s}));
+    linkedTasksCompound2.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.zip"s}));
     linkedTasksCompound2.Append([]{std::cout << "move zip finifhed." << "\r\n";});
 
 
@@ -42,8 +42,8 @@ int main() {
         linkedFileHashInfo3.Save(".\\file_testing_fields/html-file-hash.log");
     });
     linkedTasksCompound3.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_html"s));
-    linkedTasksCompound3.Append(std::bind(&CopyFilesTraversing::operator(), std::move(CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_html"s, "*.html"s})));
-    linkedTasksCompound3.Append(std::bind(&DeleteFilesTraversing::operator(), std::move(DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.html"s})));
+    linkedTasksCompound3.Append(std::bind(&CopyFilesTraversing::operator(), CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_html"s, "*.html"s}));
+    linkedTasksCompound3.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.html"s}));
     linkedTasksCompound3.Append([]{std::cout << "move html finifhed." << "\r\n";});
 
 
@@ -57,8 +57,8 @@ int main() {
         linkedFileHashInfo4.Save(".\\file_testing_fields/jpg-file-hash.log");
     });
     linkedTasksCompound4.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_jpg"s));
-    linkedTasksCompound4.Append(std::bind(&CopyFilesTraversing::operator(), std::move(CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_jpg"s, "*.jpg"s})));
-    linkedTasksCompound4.Append(std::bind(&DeleteFilesTraversing::operator(), std::move(DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.jpg"s})));
+    linkedTasksCompound4.Append(std::bind(&CopyFilesTraversing::operator(), CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_jpg"s, "*.jpg"s}));
+    linkedTasksCompound4.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.jpg"s}));
     linkedTasksCompound4.Append([]{std::cout << "move jpg finifhed." << "\r\n";});
 
 

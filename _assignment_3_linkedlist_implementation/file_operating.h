@@ -106,7 +106,6 @@ inline void toPath(std::string& dirOrPath) {
 
 template <class F>
 void WriteHashInfoFilesTraversing<F>::fileOperating() {
-    std::cout << "helloworld from WriteHashInfoFilesTraversing::fileOperating" << "\r\n";        //debug
     std::cout << "findFileDataA.cFileName: " << findFileDataA.cFileName << "\r\n";      //debug
     if (std::ifstream ifs{traversingPath + findFileDataA.cFileName, std::ios::binary | std::ios::ate}) {
         size_t size = ifs.tellg();

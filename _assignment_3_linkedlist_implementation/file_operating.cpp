@@ -29,7 +29,6 @@ void AbstractFilesTraversing::operator() () {
 }
 
 void CopyFilesTraversing::fileOperating() {
-    std::cout << "helloworld from CopyFilesTraversing::fileOperating" << "\r\n";        //debug
     if (!CopyFileA((traversingPath + findFileDataA.cFileName).c_str(), (destPath + findFileDataA.cFileName).c_str(), FALSE))
         throw std::runtime_error{"Failed to copy a file"};
     else
@@ -37,7 +36,6 @@ void CopyFilesTraversing::fileOperating() {
 }
 
 void DeleteFilesTraversing::fileOperating() {
-    std::cout << "helloworld from DeleteFilesTraversing::fileOperating" << "\r\n";        //debug
     if (!DeleteFileA((traversingPath + findFileDataA.cFileName).c_str()))
         throw std::runtime_error{"Failed to delete a file"};
     else 
