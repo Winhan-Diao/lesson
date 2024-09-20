@@ -3,7 +3,7 @@
 #define BANKING_H
 #include "LinkList.h"
 #include <iomanip>
-
+//@explorerxx  test
 class User;	// 提前声明
 
 class BWB	// Bank water bills银行流水账单
