@@ -26,29 +26,29 @@ int main() {
 
 
     LinkList<std::function<void()>> linkedTasksCompound2;
-    linkedTasksCompound2.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_zip"s));
+    linkedTasksCompound2.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_zip"s));     // 同linkedTasksCompound1，解释见【linkedTasksCompound1】
     linkedTasksCompound2.Append(std::bind(&CopyFilesTraversing::operator(), CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_zip"s, "*.zip"s}));
     linkedTasksCompound2.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.zip"s}));
     linkedTasksCompound2.Append([]{std::cout << "move zip finifhed." << "\r\n";});
 
 
     LinkList<std::function<void()>> linkedTasksCompound3;
-    linkedTasksCompound3.Append([&linkedFileHashInfo3]{
+    linkedTasksCompound3.Append([&linkedFileHashInfo3]{     // 追加任务：将文件名及文件哈希校验码以字符串形式存入链表linkedFileHashInfo3
         writeHashInfo([&linkedFileHashInfo3](std::string&& _fileLoc, std::size_t _hashcode){
             linkedFileHashInfo3.Append(std::move(_fileLoc) + "\t\t\t\t\t"s + std::to_string(_hashcode));
         }, getCurrentAbsolutePath() + "file_testing_fields/"s, "*.html"s);
     });
-    linkedTasksCompound3.Append([&linkedFileHashInfo3]{
+    linkedTasksCompound3.Append([&linkedFileHashInfo3]{     // 追加任务：将链表linkedFileHashInfo3的内容保存到"./file_testing_fields/html-file-hash.log"
         linkedFileHashInfo3.Save(".\\file_testing_fields/html-file-hash.log");
     });
-    linkedTasksCompound3.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_html"s));
+    linkedTasksCompound3.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_html"s));        // 此后同linkedTasksCompound1，解释见【linkedTasksCompound1】
     linkedTasksCompound3.Append(std::bind(&CopyFilesTraversing::operator(), CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_html"s, "*.html"s}));
     linkedTasksCompound3.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.html"s}));
     linkedTasksCompound3.Append([]{std::cout << "move html finifhed." << "\r\n";});
 
 
     LinkList<std::function<void()>> linkedTasksCompound4;
-    linkedTasksCompound4.Append([&linkedFileHashInfo4]{
+    linkedTasksCompound4.Append([&linkedFileHashInfo4]{     // 同linkedTasksCompound3，解释见【linkedTasksCompound3】
         writeHashInfo([&linkedFileHashInfo4](std::string&& _fileLoc, std::size_t _hashcode){
             linkedFileHashInfo4.Append(std::move(_fileLoc) + "\t\t\t\t\t"s + std::to_string(_hashcode));
         }, getCurrentAbsolutePath() + "file_testing_fields/"s, "*.jpg"s);
@@ -75,11 +75,11 @@ int main() {
     linkedTasksCompound5.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.exe"s}));
     linkedTasksCompound5.Append([]{std::cout << "move exe finifhed." << "\r\n";});
 
-    tp.addTasksCompound(linkedTasksCompound1);
-    tp.addTasksCompound(linkedTasksCompound2);
-    tp.addTasksCompound(linkedTasksCompound3);
-    tp.addTasksCompound(linkedTasksCompound4);
-    tp.addTasksCompound(linkedTasksCompound5);
+    tp.addTasksCompound(linkedTasksCompound1);      // 添加复合任务到线程池中去处理。
+    tp.addTasksCompound(linkedTasksCompound2);      // 添加复合任务到线程池中去处理。
+    tp.addTasksCompound(linkedTasksCompound3);      // 添加复合任务到线程池中去处理。
+    tp.addTasksCompound(linkedTasksCompound4);      // 添加复合任务到线程池中去处理。
+    
 
     return 0;
 }
