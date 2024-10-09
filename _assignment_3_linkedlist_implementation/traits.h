@@ -1,5 +1,5 @@
 #pragma once
-
+#include<type_traits>
 template <class T, class... Args>
 struct can_take {
 private:

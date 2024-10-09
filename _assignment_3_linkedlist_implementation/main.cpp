@@ -4,7 +4,6 @@
 #include <exception>
 #include "file_operating.h"
 #include "thread_pool.h"
-
 #include "linkedlist/LinkList.h"
 
 
@@ -12,17 +11,18 @@ using namespace std::chrono_literals;
 using namespace std::string_literals;
 
 std::mutex coutMutex;
-
 int main() {
+    freopen("result.txt","w",stdout);
     LinkList<std::string> linkedFileHashInfo3;
     LinkList<std::string> linkedFileHashInfo4;
-    ThreadPool tp(4);
-
+    LinkList<std::string> linkedFileHashInfo5;
+    ThreadPool tp(1);
+    tests::s=clock();
     LinkList<std::function<void()>> linkedTasksCompound1;
-    linkedTasksCompound1.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_psd"s));
-    linkedTasksCompound1.Append(std::bind(&CopyFilesTraversing::operator(), CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_psd"s, "*.psd"s}));
-    linkedTasksCompound1.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.psd"s}));
-    linkedTasksCompound1.Append([]{std::cout << "move psd finifhed." << "\r\n";});
+    linkedTasksCompound1.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_mp4"s));
+    linkedTasksCompound1.Append(std::bind(&CopyFilesTraversing::operator(), CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_mp4"s, "*.mp4"s}));
+    linkedTasksCompound1.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.mp4"s}));
+    linkedTasksCompound1.Append([]{std::cout << "move mp4 finifhed." << "\r\n";});
 
 
     LinkList<std::function<void()>> linkedTasksCompound2;
@@ -61,13 +61,25 @@ int main() {
     linkedTasksCompound4.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.jpg"s}));
     linkedTasksCompound4.Append([]{std::cout << "move jpg finifhed." << "\r\n";});
 
-
+    LinkList<std::function<void()>> linkedTasksCompound5;
+    linkedTasksCompound5.Append([&linkedFileHashInfo5]{
+        writeHashInfo([&linkedFileHashInfo5](std::string&& _fileLoc, std::size_t _hashcode){
+            linkedFileHashInfo5.Append(std::move(_fileLoc) + "\t\t\t\t\t"s + std::to_string(_hashcode));
+        }, getCurrentAbsolutePath() + "file_testing_fields/"s, "*.exe"s);
+    });
+    linkedTasksCompound5.Append([&linkedFileHashInfo5]{
+        linkedFileHashInfo5.Save(".\\file_testing_fields/exe-file-hash.log");
+    });
+    linkedTasksCompound5.Append(std::bind(createFolder, getCurrentAbsolutePath() + "file_testing_fields/folder_exe"s));
+    linkedTasksCompound5.Append(std::bind(&CopyFilesTraversing::operator(), CopyFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, getCurrentAbsolutePath() + "file_testing_fields/folder_exe"s, "*.exe"s}));
+    linkedTasksCompound5.Append(std::bind(&DeleteFilesTraversing::operator(), DeleteFilesTraversing{getCurrentAbsolutePath() + "file_testing_fields/"s, "*.exe"s}));
+    linkedTasksCompound5.Append([]{std::cout << "move exe finifhed." << "\r\n";});
 
     tp.addTasksCompound(linkedTasksCompound1);
     tp.addTasksCompound(linkedTasksCompound2);
     tp.addTasksCompound(linkedTasksCompound3);
     tp.addTasksCompound(linkedTasksCompound4);
-    
+    tp.addTasksCompound(linkedTasksCompound5);
 
     return 0;
 }

@@ -36,4 +36,7 @@ ThreadPool::~ThreadPool() noexcept {
     cv.notify_all();
     for (auto& _thread: threads)
         _thread.join();
+    tests::t=clock();
+    double a=tests::s,b=tests::t;
+    printf("costing time : %.2lf ms",b-a);
 }

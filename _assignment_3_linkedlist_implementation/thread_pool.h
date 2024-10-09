@@ -6,7 +6,12 @@
 #include <queue>
 #include <atomic>
 #include <type_traits>
+#include<condition_variable>
 #include "linkedlist/LinkList.h"
+
+namespace tests {
+    static double s, t;
+}
 
 class ThreadPool {
 private:
