@@ -18,8 +18,9 @@ int col(char msg){
 }
 int Pos(char ch, const char *str);
 int Choice(const char *prompt, const char *options="");	// 函数声明,输出提示信息prompt，输入选择的字符并返回。
+void test();
 int tot;//向量对象个数
-std::vector<vec>q;
+std::vector< vec<double> >q;
 int main(){
 	int key;
 	srand(time(0));
@@ -35,11 +36,8 @@ int main(){
 		cout << "5 --- 为已经存在的向量随机设值" << endl;
 		cout<< "6 --- 展示指定编号的向量" <<endl;
 		cout<< "7 --- 展示所有存在的向量" <<endl;
-		cout<<"8 --- 展示指定编号的向量的指定维度的值"<<endl;
-		cout<< "a --- 测试向量加法"<<endl;
-		cout<<"b --- 测试向量减法"<<endl;
-		cout<<"c --- 测试向量乘法"<<endl;
-		key = Choice("\n请选择", "12345678abc\x1b");
+		cout<< "a --- 测试向量运算符重载<<,>>,+,+=,-,-=,*,*=,[],==,!="<<endl;
+		key = Choice("\n请选择", "1234567a\x1b");
 		cout << "\n\n";
 		if(key==27)		// '\x1b'等于27，指ESC键
 			break;
@@ -52,7 +50,7 @@ int main(){
 		switch (key)
 		{
 		case '1':{
-			vec x(rand()%10+1);
+			vec<double> x(rand()%10+1);
 			x.Rand();
 			q.push_back(x);	
 			tot++;
@@ -60,34 +58,34 @@ int main(){
 		}
 		case '2':{
 			col('g');
-			cout<<"输入一个正整数n:";
+			cout<<"输入一个不超过100的正整数n:";
 			col('w');
 			int n;
 			cin>>n;
-			if(n<=0){
+			if(n<=0||n>100){
 				col('r');
 				cout<<"维度非法！";
 				col('w');
 				break;
 			}
-			vec x(n);
+			vec<double> x(n);
 			tot++;
 			q.push_back(x);
 			break;
 		}
 		case '3':{
 			col('g');
-			cout<<"输入一个正整数n:";
+			cout<<"输入一个不超过100的正整数n:";
 			col('w');
 			int n;
 			cin>>n;
-			if(n<=0){
+			if(n<=0||n>100){
 				col('r');
 				cout<<"维度非法！";
 				col('w');
 				break;
 			}
-			vec x(n);
+			vec<double> x(n);
 			tot++;
 			q.push_back(x);
 			q[tot-1].Set();
@@ -152,6 +150,10 @@ int main(){
 			}
 			break;
 		}
+		case 'a':{
+
+			break;
+		}  
 		default:
 			break;
 		}
