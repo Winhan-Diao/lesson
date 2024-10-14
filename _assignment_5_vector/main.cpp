@@ -206,7 +206,7 @@ void test(){
 	y.Rand();
 	cout<<"x="<<x<<endl;
 	cout<<"y="<<y<<endl;
-	vec<double> z;
+	vec<double> z(3,new double[3]{1,2,3});
 	cout<<"x+y="<<x+y<<endl;
 	cout<<"x-y="<<x-y<<endl;
 	cout<<"x*y="<<x*y<<endl;
