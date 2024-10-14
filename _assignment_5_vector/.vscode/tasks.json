@@ -10,14 +10,14 @@
                 // "List_int.cpp",
                 // "Main.cpp"
                 "main.cpp",
-                "vec.cpp",
+                // "vec.cpp",
                 // "${fileDirname}\\*.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "-Wall",
                 "-static-libgcc",
                 "-fexec-charset=GBK",
-                "-std=c++11",
+                "-std=c++17",
                 "-finput-charset=UTF-8"
             ],
             "group": {

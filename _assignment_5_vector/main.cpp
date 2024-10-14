@@ -9,7 +9,7 @@
 using std::cin;
 using std::cout;
 using std::endl;
-#include"vec.h"
+#include"vec.hpp"
 int col(char msg){
 	if(msg=='r') SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED);//设置红色
 	if(msg=='w') SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY |FOREGROUND_RED |FOREGROUND_GREEN | FOREGROUND_BLUE);//设置三色相加
