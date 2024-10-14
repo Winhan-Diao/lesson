@@ -4,8 +4,6 @@
 #include<iostream>
 using std::istream;
 using std::ostream;
-using std::cin;
-using std::cout;
 template<typename T>
 class vec
 {
@@ -30,8 +28,8 @@ public:
 	bool operator==(const vec &a)const;
 	bool operator!=(const vec &a)const;
 	T &operator[](const int &a)const;
-	template<typename Ts> friend istream &operator>>(istream &in,vec<Ts> &a);
-	template<typename Ts> friend ostream &operator<<(ostream &out,const vec<Ts> &a);
+	istream & operator>>(istream &in);
+	ostream & operator<<(ostream &out);
 	void length()const;
 	void Rand();
 	void Set();
@@ -187,7 +185,6 @@ vec<T> vec<T>::operator^(const vec &a) const
 	temp[0]=p[1]*a.p[2]-p[2]*a.p[1];
 	temp[1]=p[2]*a.p[0]-p[0]*a.p[2];
 	temp[2]=p[0]*a.p[1]-p[1]*a.p[0];
-	
 	return temp;
 }
 
@@ -224,28 +221,28 @@ bool vec<T>::operator!=(const vec &a) const
 typeT
 T &vec<T>::operator[](const int &a) const
 {
-	if(a<0||a>dimension) throw "access out of bounds";
+	if(a<=0||a>dimension) throw "access out of bounds";
 	return p[a];
 }
-template<class T>
-istream &operator>>(istream &in,vec<T> &a)
+typeT
+istream &vec<T>::operator>>(istream &in)
 {
-	in>>a.dimension;
-	if(a.dimension<0||a.dimension>100) throw "Error Dimension number!";
-	a.p=new T[a.dimension];
-	for(int i=0;i<a.dimension;i++){
-		in>>a.p[i];
+	in>>dimension;
+	if(dimension<0||dimension>100) throw "Error Dimension number!";
+	p=new T[dimension];
+	for(int i=0;i<dimension;i++){
+		in>>p[i];
 	}
 	return in;
 }
-template <typename T>
-ostream &operator<<(ostream &out,const vec<T> &a)
+typeT
+ostream &vec<T>::operator<<(ostream &out)
 {
-	out<<a.dimension;
+	out<<dimension;
 	out<<'(';
-	for(int i=0;i<a.dimension;i++){
-		out<<a.p[i];
-		if(i!=a.dimension-1) out<<',';
+	for(int i=0;i<dimension;i++){
+		out<<p[i];
+		if(i!=dimension-1) out<<',';
 	}
 	out<<')';
 	return out;
@@ -268,6 +265,7 @@ void vec<T>::Rand(){//设置为-500~500之间的数
 	if(!dimension){
 		throw 'R';
 	}
+	srand(time(0));
 	for(int i=0;i<dimension;i++) p[i]=rand()%1001-500;
 }
 typeT
@@ -294,4 +292,3 @@ vec<T>::~vec()
 	dimension=0;
 }
 #endif
-
