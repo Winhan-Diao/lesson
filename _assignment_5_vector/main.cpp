@@ -204,7 +204,6 @@ void test(){
 	x.Rand();
 	vec<double> y(3);
 	y.Rand();
-	cout<<"x^y="<<(x^y)<<endl;
 	cout<<"x="<<x<<endl;
 	cout<<"y="<<y<<endl;
 	vec<double> z;
