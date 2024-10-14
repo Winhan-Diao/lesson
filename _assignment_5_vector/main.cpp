@@ -16,6 +16,7 @@ int col(char msg){
 	if(msg=='g') SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_GREEN);//设置绿色
 	if(msg=='b') SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_BLUE);//设置蓝色
 }
+
 int Pos(char ch, const char *str);
 int Choice(const char *prompt, const char *options="");	// 函数声明,输出提示信息prompt，输入选择的字符并返回。
 void test();
@@ -151,7 +152,7 @@ int main(){
 			break;
 		}
 		case 'a':{
-			
+			test();
 			break;
 		}  
 		default:
@@ -196,4 +197,32 @@ int Choice(const char *prompt, const char *options)		// 函数定义。
 	}while(options[0]!='\0' && Pos(key, options)<0); // 若options为空长度为0的字符串，则输入无限制；否则输入项应该在optins中。
 	cout << endl;
 	return key;
+}
+void test(){
+	cout<<"运算符重载功能测试"<<endl;
+	vec<double> x(3);
+	x.Rand();
+	vec<double> y(3);
+	y.Rand();
+	cout<<"x^y="<<(x^y)<<endl;
+	cout<<"x="<<x<<endl;
+	cout<<"y="<<y<<endl;
+	vec<double> z;
+	cout<<"x+y="<<x+y<<endl;
+	cout<<"x-y="<<x-y<<endl;
+	cout<<"x*y="<<x*y<<endl;
+	cout<<"x*2="<<x*2<<endl;
+	x*=2;
+	cout<<"x*=2="<<x<<endl;
+	x+=y;
+	cout<<"x+=y="<<x<<endl;
+	x-=y;
+	cout<<"x-=y="<<x<<endl;
+	cout<<"x[1]="<<x[1]<<endl;
+	cout<<"x==y?"<<(x==y)<<endl;
+	cout<<"x!=y?"<<(x!=y)<<endl;
+	cout<<"x.dimension(x.length()):";
+	x.length();x^=y;
+	cout<<"x^=y"<<x<<endl;
+	cout<<"x^y="<<(x^y)<<endl;
 }
