@@ -12,7 +12,7 @@ private:
 	T *p;
 public:
 	vec(const int &length,const T x[]); //一种直接构造
-	vec(const int &length=0);	//
+	vec(const int &length=0);	
 	vec(const vec &a);
 	vec &operator=(const vec &a);
 	vec operator+(const vec &a)const;
@@ -21,13 +21,18 @@ public:
 	vec &operator-=(const vec &a);
 	T operator*(const vec &a)const;
 	T &operator*=(const vec &a);
+	vec operator*(const T &a)const;
+	vec &operator*=(const T &a);
+	vec operator^(const vec &a)const;
+	vec &operator^=(const vec &a);
 	bool operator==(const vec &a)const;
 	bool operator!=(const vec &a)const;
-	T operator[](const int &a)const;
+	T &operator[](const int &a)const;
 	istream & operator>>(istream &in);
 	ostream & operator<<(ostream &out);
-	void Rand()const;
-	void Set()const;
+	void length()const;
+	void Rand();
+	void Set();
 	void show()const;
 	~vec();
 };
@@ -44,7 +49,7 @@ vecT::vec(const int &length,const T x[])
 	int siz=sizeof(x)/sizeof(T);
 	std::cout<<siz;
 	if(length>siz){
-		throw 'I';
+		throw 'Array length is too short!';
 	}
 	p=new T[length];
 
@@ -108,39 +113,113 @@ vecT &vec<T>::operator+=(const vec &a)
 	if(a.dimension!=dimension){
 		throw "Add vectors of Different Dimension";
 	}
-	// TODO: 在此处插入 return 语句
+	for(int i=0;i<dimension;i++)
+	{
+		p[i]+=a.p[i];
+	}
+	return *this;
 }
 vecT &vec<T>::operator-=(const vec &a) 
 {
 	if(a.dimension!=dimension){
 		throw "Minus vectors of Different Dimension";
 	}
-	// TODO: 在此处插入 return 语句
+	for(int i=0;i<dimension;i++)
+	{
+		p[i]-=a.p[i];
+	}
+	return *this;
 }
 typeT
-T vec<T>::operator*(const vec<T> &a) const
+T vec<T>::operator*(const vec &a) const
 {
-
-	// TODO: 在此处插入 return 语句
+	T temp=0;
+	if(a.dimension!=dimension){
+		throw "Multiply vectors of Different Dimension";
+	}
+	for(int i=0;i<dimension;i++){
+		temp+=p[i]*a.p[i];
+	}
+	return temp;
 }
 typeT
-T &vec<T>::operator*=(const vec<T> &a) 
+T &vec<T>::operator*=(const vec &a) 
 {	
-
-	// TODO: 在此处插入 return 语句
+	T temp=0;
+	if(a.dimension!=dimension){
+		throw "Multiply vectors of Different Dimension";
+	}
+	for(int i=0;i<dimension;i++){
+		temp+=p[i]*a.p[i];
+	}
+	return temp;
 }
-typeT
-bool vec<T>::operator==(const vec &a) const
+
+template <typename T>
+vec<T> vec<T>::operator*(const T &a) const
 {
-	return false;
+	vec<T> temp=*this;
+	for(int i=0;i<dimension;i++){
+		temp.p[i]*=a;
+	}
+	return temp;
+}
+
+template <typename T>
+vec<T> &vec<T>::operator*=(const T &a)
+{
+	for(int i=0;i<dimension;i++){
+		p[i]*=a;
+	}
+	return *this;
+}
+
+// 向量外积，只能对三维向量进行操作
+template <typename T>
+vec<T> vec<T>::operator^(const vec &a) const
+{
+	if(a.dimension!=3||dimension!=3){
+		throw std::invalid_argument("Cross product is only defined for 3D vectors.");
+	}
+	vec<T> temp(3);
+	temp[0]=p[1]*a.p[2]-p[2]*a.p[1];
+	temp[1]=p[2]*a.p[0]-p[0]*a.p[2];
+	temp[2]=p[0]*a.p[1]-p[1]*a.p[0];
+	return temp;
+}
+
+template <typename T>
+vec<T> &vec<T>::operator^=(const vec &a)
+{
+	if(a.dimension!=3||dimension!=3){
+		throw std::invalid_argument("Cross product is only defined for 3D vectors.");
+	}
+	T tmp=p[0]*a.p[1]-p[1]*a.p[0];
+	p[0]=p[1]*a.p[2]-p[2]*a.p[1];
+	p[1]=p[2]*a.p[0]-p[0]*a.p[2];
+	p[2]=tmp;
+	return *this;
+}
+
+typeT bool vec<T>::operator==(const vec &a) const
+{
+	if(a.dimension!=dimension) return false;
+	for(int i=0;i<dimension;i++){
+		if(p[i]!=a.p[i]) return false;
+	}
+	return true;
 }
 typeT
 bool vec<T>::operator!=(const vec &a) const
 {
+	if(a.dimension!=dimension) return true;
+	for(int i=0;i<dimension;i++){
+		if(p[i]!=a.p[i]) return true;
+	}
 	return false;
 }
 typeT
-T vec<T>::operator[](const int &a) const
+T &vec<T>::operator[](const int &a) const
 {
 	if(a<=0||a>dimension) throw "access out of bounds";
 	return p[a];
@@ -148,15 +227,32 @@ T vec<T>::operator[](const int &a) const
 typeT
 istream &vec<T>::operator>>(istream &in)
 {
-	// TODO: 在此处插入 return 语句
+	in>>dimension;
+	if(dimension<0||dimension>100) throw "Error Dimension number!";
+	p=new T[dimension];
+	for(int i=0;i<dimension;i++){
+		in>>p[i];
+	}
+	return in;
 }
 typeT
 ostream &vec<T>::operator<<(ostream &out)
 {
-	// TODO: 在此处插入 return 语句
+	out<<dimension;
+	out<<'(';
+	for(int i=0;i<dimension;i++){
+		out<<p[i];
+		if(i!=dimension-1) out<<',';
+	}
+	out<<')';
+	return out;
 }
-typeT
-void vec<T>::Set() const
+template <typename T>
+inline void vec<T>::length() const
+{
+	std::cout<<dimension<<endl;
+}
+typeT void vec<T>::Set() 
 {
 	printf("请输入%d个向量值\n",dimension);
 	int temp=0;
@@ -165,7 +261,7 @@ void vec<T>::Set() const
 	}
 }
 typeT
-void vec<T>::Rand()const{//设置为-500~500之间的数
+void vec<T>::Rand(){//设置为-500~500之间的数
 	if(!dimension){
 		throw 'R';
 	}
