@@ -6,6 +6,7 @@ using std::istream;
 using std::ostream;
 using std::cin;
 using std::cout;
+using std::endl;
 template<typename T>
 class vec
 {

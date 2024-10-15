@@ -10,6 +10,7 @@
                 // "List_int.cpp",
                 // "Main.cpp"
                 "main.cpp",
+                // "test.cpp",
                 // "${fileDirname}\\*.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
