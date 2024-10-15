@@ -242,7 +242,7 @@ typeT void vec<T>::Set()
 typeT
 void vec<T>::Rand(){//设置为-500~500之间的数
 	if(!dimension){
-		throw "empty vector!";
+		return;
 	}
 	for(int i=0;i<dimension;i++) p[i]=rand()%1001-500;
 }
