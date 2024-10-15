@@ -84,6 +84,7 @@ int main(){
 			col('w');
 			int n;
 			cin>>n;
+			std::fflush(stdin);//防止多输入
 			if(n<=0||n>100){
 				col('r');
 				cout<<"维度非法！";
@@ -102,6 +103,7 @@ int main(){
 			cout<<"请选择向量编号(编号从1开始)：";
 			col('w');
 			cin>>p;
+			std::fflush(stdin);//防止多输入
 			if(p>tot||p<0){
 				col('r');
 				cout<<"error:不存在的编号！";
@@ -162,6 +164,7 @@ int main(){
 		default:
 			break;
 		}
+		std::fflush(stdin);	//防止多输入从而影响下一次测试进程。
 	}
 	return 0;
 }
@@ -247,25 +250,17 @@ void test(){
 }
 
 void IN_test(){
-	bool flag=0;
 	try{
-		vec<int> v;
-		cin>>v;
-		cout<<v<<endl;
-		flag=1;
+		vec<int> v1,v2;
+		cin>>v1>>v2;
+		cout<<v1<<"  "<<v2<<endl;
 	}catch(const char* msg){
 		cout<<msg<<endl;
-		flag=0;
 	}
-	if(flag){
-		col('r');
-		cout<<"输入重载失败！"<<endl;
-		col('w');
-	}else{
-		col('g');
-		cout<<"输入重载成功！"<<endl;
-		col('w');
-	}
+	col('g');
+	cout<<"输入重载成功！"<<endl;
+	col('w');
+	std::fflush(stdin);		//防止多输入从而影响其它测试进程。
 }
 void constructors_test()
 {
@@ -420,7 +415,6 @@ void calc_test(){
 		col('w');
 	}
 	
-
 	col('b'),cout<<"\n\t3.测试'*','*='运算符"<<endl,col('w');
 
 	col('b'),cout<<"v1:",col('w'),cout<<v1<<endl;

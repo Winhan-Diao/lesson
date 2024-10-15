@@ -32,7 +32,7 @@ public:
 	T &operator[](const int &a)const;
 	template<typename Ts> friend istream &operator>>(istream &in,vec<Ts> &a);
 	template<typename Ts> friend ostream &operator<<(ostream &out,const vec<Ts> &a);
-	void length()const;
+	int length()const;
 	void Rand();
 	void Set();
 	void show()const;
@@ -209,7 +209,10 @@ template<class T>
 istream &operator>>(istream &in,vec<T> &a)
 {
 	in>>a.dimension;
-	if(a.dimension<0||a.dimension>100) throw "Error Dimension number!";
+	if(a.dimension<0||a.dimension>100){
+		std::fflush (stdin);
+		throw "Error Dimension number!";
+	} 
 	a.p=new T[a.dimension];
 	for(int i=0;i<a.dimension;i++){
 		in>>a.p[i];
@@ -228,9 +231,9 @@ ostream &operator<<(ostream &out,const vec<T> &a)
 	return out;
 }
 template <typename T>
-inline void vec<T>::length() const
+inline int vec<T>::length() const
 {
-	std::cout<<dimension<<endl;
+	return dimension;
 }
 typeT void vec<T>::Set() 
 {
@@ -245,7 +248,7 @@ void vec<T>::Rand(){//设置为-500~500之间的数
 	if(!dimension){
 		return;
 	}
-	for(int i=0;i<dimension;i++) p[i]=rand()%1001-500;
+	for(int i=0;i<dimension;i++) p[i]=(double)(rand()%10001-5000)/10;
 }
 typeT
 void vec<T>::show()const{
@@ -257,7 +260,7 @@ void vec<T>::show()const{
 		printf("(");
 		for(int i=0;i<dimension;i++){
 			if(i) printf(",");
-			printf("%.2lf",p[i]);
+			cout<<p[i];
 		} 
 		printf(")");
 		printf("\n");
