@@ -202,7 +202,7 @@ bool vec<T>::operator!=(const vec &a) const
 typeT
 T &vec<T>::operator[](const int &a) const
 {
-	if(a<0||a>dimension) throw "access out of bounds";
+	if(a<0||a>=dimension) throw "access out of bounds";
 	return p[a];
 }
 template<class T>

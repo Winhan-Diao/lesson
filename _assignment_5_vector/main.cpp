@@ -21,6 +21,7 @@ void col(char msg){
 int Pos(char ch, const char *str);
 int Choice(const char *prompt, const char *options="");	// 函数声明,输出提示信息prompt，输入选择的字符并返回。
 void test();
+void IN_test();
 void constructors_test();
 void calc_test();
 int tot;//向量对象个数
@@ -207,22 +208,65 @@ int Choice(const char *prompt, const char *options)		// 函数定义。
 · 异常抛出测试 
 */
 void test(){
-	col('g');
-	cout<<"\t\t\t运算符重载功能测试"<<endl;
-	col('w');
-
-	col('b');
-	cout<<"\n\t\t构造函数测试"<<endl;
-	col('w');
-	constructors_test();
-
-	col('b');
-	cout<<"\n\t\t运算测试"<<endl;
-	col('w');
-	calc_test();
-
+	while(1){
+		col('g');
+		cout<<"\n\t输入任意键继续测试,输入ESC退出测试!"<<endl;
+		col('w');
+		cout << "1 --- 输入向量测试" << endl;
+		cout << "2 --- 构造函数测试" << endl;
+		cout << "3 --- 运算符测试" << endl;
+		int key=Choice("\n请选择", "123\x1b");
+		if(key==27)break;
+		switch (key)
+		{
+		case '1':{
+			col('b');
+			cout<<"\n\t\t输入向量测试"<<endl;
+			col('w');
+			IN_test();
+			break;
+		}
+		case '2':{
+			col('b');
+			cout<<"\n\t\t构造函数测试"<<endl;
+			col('w');	
+			constructors_test();
+			break;
+		}
+		case '3':{
+			col('b');
+			cout<<"\n\t\t运算符测试"<<endl;
+			col('w');
+			calc_test();
+			break;
+		}
+		default:
+			break;
+		}
+	}
 }
 
+void IN_test(){
+	bool flag=0;
+	try{
+		vec<int> v;
+		cin>>v;
+		cout<<v<<endl;
+		flag=1;
+	}catch(const char* msg){
+		cout<<msg<<endl;
+		flag=0;
+	}
+	if(flag){
+		col('r');
+		cout<<"输入重载失败！"<<endl;
+		col('w');
+	}else{
+		col('g');
+		cout<<"输入重载成功！"<<endl;
+		col('w');
+	}
+}
 void constructors_test()
 {
 	// 正常情况测试
@@ -288,6 +332,16 @@ void calc_test(){
     for (int i = 0; i < 3; i++) {
         if(v2[i]!=v1[i]) flag=1;
     }
+	try{
+		col('r');
+		cout<<"异常情况测试3,'[]'下标越界:v2[3]"<<endl;
+		col('w');
+		v2[3];
+		flag=1;
+	}catch(const char* msg){
+		cout<<msg<<endl;
+		flag=0;
+	}
     if(flag){ 
 		col('r');
 		cout<<"赋值运算符重载错误"<<endl;
