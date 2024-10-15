@@ -210,7 +210,8 @@ istream &operator>>(istream &in,vec<T> &a)
 {
 	in>>a.dimension;
 	if(a.dimension<0||a.dimension>100){
-		std::fflush (stdin);
+		std::cin.clear(); // 清除错误状态
+		std::fflush(stdin);		//防止多输入从而影响其它输入
 		throw "Error Dimension number!";
 	} 
 	a.p=new T[a.dimension];
