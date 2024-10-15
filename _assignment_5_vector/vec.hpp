@@ -21,7 +21,6 @@ public:
 	vec &operator+=(const vec &a);
 	vec &operator-=(const vec &a);
 	T operator*(const vec &a)const;
-	T &operator*=(const vec &a);
 	vec operator*(const T &a)const;
 	vec &operator*=(const T &a);
 	template<class Ts,class Tv> friend vec<Tv> operator*(const Ts &a,const vec<Tv> &v);
@@ -86,7 +85,7 @@ vecT vec<T>::operator-(const vec &a) const
 	if(a.dimension!=dimension){
 		throw "Minus vectors of Different Dimension";
 	}
-	vec temp=a;
+	vec temp=*this;
 	for(int i=0;i<dimension;i++){
 		temp.p[i]-=a.p[i];
 	}
@@ -129,23 +128,11 @@ T vec<T>::operator*(const vec &a) const
 
 template<class Ts,class T>vec<T> operator*(const Ts &a, const vec<T> &v) 
 {
+	vec<T> temp=v;
 	for(int i=0;i<v.dimension;i++){
-		v.p[i]*=a;
+		temp.p[i]*=a;
 	}
-    return v;
-}
-
-typeT
-T &vec<T>::operator*=(const vec &a) 
-{	
-	T temp=0;
-	if(a.dimension!=dimension){
-		throw "Multiply vectors of Different Dimension";
-	}
-	for(int i=0;i<dimension;i++){
-		temp+=p[i]*a.p[i];
-	}
-	return temp;
+    return temp;
 }
 
 template <typename T>
@@ -172,7 +159,7 @@ template <typename T>
 vec<T> vec<T>::operator^(const vec &a) const
 {
 	if(a.dimension!=3||dimension!=3){
-		throw std::invalid_argument("Cross product is only defined for 3D vectors.");
+		throw "Cross product is only defined for 3D vectors.";
 	}
 	vec<T> temp(3);
 	temp[0]=p[1]*a.p[2]-p[2]*a.p[1];
@@ -185,11 +172,11 @@ template <typename T>
 vec<T> &vec<T>::operator^=(const vec &a)
 {
 	if(a.dimension!=3||dimension!=3){
-		throw std::invalid_argument("Cross product is only defined for 3D vectors.");
+		throw "Cross product is only defined for 3D vectors.";
 	}
-	T tmp=p[0]*a.p[1]-p[1]*a.p[0];
+	T tmp=p[0]*a.p[1]-p[1]*a.p[0],temp=p[0];
 	p[0]=p[1]*a.p[2]-p[2]*a.p[1];
-	p[1]=p[2]*a.p[0]-p[0]*a.p[2];
+	p[1]=p[2]*a.p[0]-temp*a.p[2];
 	p[2]=tmp;
 	return *this;
 }

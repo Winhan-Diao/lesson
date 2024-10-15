@@ -40,7 +40,7 @@ int main(){
 		cout << "5 --- 为已经存在的向量随机设值" << endl;
 		cout<< "6 --- 展示指定编号的向量" <<endl;
 		cout<< "7 --- 展示所有存在的向量" <<endl;
-		cout<< "a --- 测试向量运算符重载<<,>>,+,+=,-,-=,*,*=,[],==,!="<<endl;
+		cout<< "a --- 测试向量运算符重载<<,>>,+,+=,-,-=,*,*=,[],==,!=,^,^="<<endl;
 		key = Choice("\n请选择", "1234567a\x1b");
 		cout << "\n\n";
 		if(key==27)		// '\x1b'等于27，指ESC键
@@ -208,16 +208,16 @@ int Choice(const char *prompt, const char *options)		// 函数定义。
 */
 void test(){
 	col('g');
-	cout<<"\t\t运算符重载功能测试"<<endl;
+	cout<<"\t\t\t运算符重载功能测试"<<endl;
 	col('w');
 
 	col('b');
-	cout<<"\n\t构造函数测试"<<endl;
+	cout<<"\n\t\t构造函数测试"<<endl;
 	col('w');
 	constructors_test();
 
 	col('b');
-	cout<<"\n\t运算测试"<<endl;
+	cout<<"\n\t\t运算测试"<<endl;
 	col('w');
 	calc_test();
 
@@ -271,9 +271,10 @@ void constructors_test()
 
 //测试 [],=,+,+=,-,-=,*,*=,==,!=,^,^= 运算符的功能
 void calc_test(){
-	cout<<"v1,v2: v1[0]=1,v1[1]=2,v1[2]=3,v2=v1, 以此对'='和'[]'进行验证"<<endl;
+	col('b'),cout<<"\n\t1. v1,v2: v1[0]=1,v1[1]=2,v1[2]=3,v2=v1, 以此对'='和'[]'进行验证"<<endl,col('w');
 	vec<int> v1(3);
     vec<int> v2(3);
+	vec<int> v3(4,1);
     v1[0] = 1;
     v1[1] = 2;
     v1[2] = 3;
@@ -287,9 +288,9 @@ void calc_test(){
     for (int i = 0; i < 3; i++) {
         if(v2[i]!=v1[i]) flag=1;
     }
-    if(flag){
+    if(flag){ 
 		col('r');
-		cout<<"异常情况测试3,赋值运算符重载错误"<<endl;
+		cout<<"赋值运算符重载错误"<<endl;
 		col('w');
 	}else{
 		col('g');
@@ -297,6 +298,154 @@ void calc_test(){
 		col('w');
 	}
 
+	col('b'),cout<<"\n\t2.测试'+','+=','-','-='运算符"<<endl,col('w');
+	col('b'),cout<<"v1:",col('w'),cout<<v1<<endl;
+	col('b'),cout<<"v2:",col('w'),cout<<v2<<endl;
+	col('b'),cout<<"v3:",col('w'),cout<<v3<<endl;
+	//正常使用测试 
+	col('b'),cout<<"v1+v2:",col('w');
+	cout<<v1+v2<<endl;
+	col('b'),cout<<"v1+=v2:",col('w');
+	v1+=v2;
+	cout<<v1<<endl;
+	col('b'),cout<<"v1-v2:",col('w');
+	cout<<v1-v2<<endl;
+	col('b'),cout<<"v1-=v2:",col('w');
+	v1-=v2;
+	cout<<v1<<endl;
+	
+	//异常使用测试
+	try{
+		col('r');
+		cout<<"异常情况测试4,'+'维度不匹配:v1+v3"<<endl;
+		col('w');
+		v1+v3;
+		flag=1;
+	}catch(const char* msg){
+		cout<<msg<<endl;
+		flag=0;
+	}
+	try{
+		col('r');
+		cout<<"异常情况测试4,'+='维度不匹配:v1+=v3"<<endl;
+		col('w');
+		v1+=v3;
+		flag=1;
+	}catch(const char* msg){
+		cout<<msg<<endl;
+		flag=0;
+	}
+	try{
+		col('r');
+		cout<<"异常情况测试4,'-'维度不匹配:v1-v3"<<endl;
+		col('w');
+		v1-v3;
+		flag=1;
+	}catch(const char* msg){
+		cout<<msg<<endl;
+		flag=0;
+	}
+	try{
+		col('r');
+		cout<<"异常情况测试4,'-='维度不匹配:v1-=v3"<<endl;
+		col('w');
+		v1-=v3;
+		flag=1;
+	}catch(const char* msg){
+		cout<<msg<<endl;
+		flag=0;
+	}
+
+	if(flag){
+		col('r');
+		cout<<"'+','+=','-','-='运算符重载错误"<<endl;
+		col('w');
+	}else{
+		col('g');
+		cout<<"'+','+=','-','-='重载正确"<<endl;
+		col('w');
+	}
 	
 
+	col('b'),cout<<"\n\t3.测试'*','*='运算符"<<endl,col('w');
+
+	col('b'),cout<<"v1:",col('w'),cout<<v1<<endl;
+	col('b'),cout<<"v2:",col('w'),cout<<v2<<endl;
+	col('b'),cout<<"v3:",col('w'),cout<<v3<<endl;
+	//正常使用测试
+	col('b'),cout<<"v1*2,2*v1:",col('w');
+	cout<<v1*2<<','<<2*v1<<endl;
+	col('b'),cout<<"v1*=2:",col('w');
+	v1*=2;
+	cout<<v1<<endl;
+	col('b'),cout<<"v1*v2:",col('w');
+	cout<<v1*v2<<endl;
+	//异常使用测试
+	try{
+		col('r');
+		cout<<"异常情况测试5,'*'维度不匹配:v1*v3"<<endl;
+		col('w');
+		v1*v3;
+		flag=1;
+	}catch(const char* msg){
+		cout<<msg<<endl;
+		flag=0;
+	}
+	if(flag){
+		col('r');
+		cout<<"'*','*='运算符重载错误"<<endl;
+		col('w');
+	}else{
+		col('g');
+		cout<<"'*','*='重载正确"<<endl;
+		col('w');
+	}
+
+	
+	col('b'),cout<<"\n\t4.测试'=='和'!='运算符"<<endl,col('w');
+
+	//正常使用测试
+	col('b'),cout<<"v1:",col('w'),cout<<v1<<endl;
+	col('b'),cout<<"v2:",col('w'),cout<<v2<<endl;
+	col('b'),cout<<"v3:",col('w'),cout<<v3<<endl;
+	col('b'),cout<<"v1==v2,v1!=v2,v1==v3:",col('w');
+	cout<<(v1==v2)<<','<<(v1!=v2)<<','<<(v1==v3)<<endl;
+	col('g'),cout<<"'='和'!='重载正确"<<endl,col('w');
+
+	col('b'),cout<<"\n\t5.测试'^','^='运算符(三维向量的外积)"<<endl,col('w');
+
+	//正常使用测试
+
+	col('b'),cout<<"v1:",col('w'),cout<<v1<<endl;
+	col('b'),cout<<"v2:",col('w'),cout<<v2<<endl;
+	col('b'),cout<<"v3:",col('w'),cout<<v3<<endl;
+	col('b'),cout<<"v1^v2:",col('w');
+	cout<<(v1^v2)<<endl;
+	col('b'),cout<<"v1^=v2:",col('w');
+	v1^=v2;
+	cout<<v1<<endl;
+	//异常使用测试
+	try{
+		col('r');
+		cout<<"异常情况测试6,'^'维度不适用:v1^v3"<<endl;
+		col('w');
+		v1^v3;
+		flag=1;
+	}catch(const char* msg){
+		cout<<msg<<endl;
+		flag=0;
+	}
+	if(flag){
+		col('r');
+		cout<<"'^','^='运算符重载错误"<<endl;
+		col('w');
+	}else{
+		col('g');
+		cout<<"'^','^='重载正确"<<endl;
+		col('w');
+	}
+	
+	col('g'),
+	cout<<"\n\t~测试完成~"<<endl;
+	col('w');
 }
