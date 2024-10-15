@@ -52,6 +52,7 @@ int main(){
 			col('w');
 			continue;
 		}
+		// std::fflush(stdin);	//防止多输入从而影响下一次测试进程。
 		switch (key)
 		{
 		case '1':{
@@ -84,7 +85,7 @@ int main(){
 			col('w');
 			int n;
 			cin>>n;
-			std::fflush(stdin);//防止多输入
+			std::fflush(stdin);//防止set多输入
 			if(n<=0||n>100){
 				col('r');
 				cout<<"维度非法！";
@@ -103,12 +104,12 @@ int main(){
 			cout<<"请选择向量编号(编号从1开始)：";
 			col('w');
 			cin>>p;
-			std::fflush(stdin);//防止多输入
+			std::fflush(stdin);//防止set多输入
 			if(p>tot||p<0){
 				col('r');
 				cout<<"error:不存在的编号！";
 				col('w');
-				continue;
+				break;
 			}else if(!p){
 				break;
 			}
@@ -125,7 +126,7 @@ int main(){
 				col('r');
 				cout<<"error:不存在的编号！";
 				col('w');
-				continue;
+				break;
 			}else if(!p){
 				break;
 			}
@@ -142,7 +143,7 @@ int main(){
 				col('r');
 				cout<<"error:不存在的编号！";
 				col('w');
-				continue;
+				break;
 			}else if(!p){
 				break;
 			}
@@ -164,7 +165,8 @@ int main(){
 		default:
 			break;
 		}
-		std::fflush(stdin);	//防止多输入从而影响下一次测试进程。
+		std::cin.clear(); // 清除错误状态
+		fflush(stdin);	//清除输入缓冲区
 	}
 	return 0;
 }
@@ -253,6 +255,7 @@ void IN_test(){
 	try{
 		vec<int> v1,v2;
 		cin>>v1>>v2;
+		col('b'),cout<<"v1 v2:",col('w');
 		cout<<v1<<"  "<<v2<<endl;
 	}catch(const char* msg){
 		cout<<msg<<endl;
@@ -260,6 +263,7 @@ void IN_test(){
 	col('g');
 	cout<<"输入重载成功！"<<endl;
 	col('w');
+	std::cin.clear(); // 清除错误状态
 	std::fflush(stdin);		//防止多输入从而影响其它测试进程。
 }
 void constructors_test()
