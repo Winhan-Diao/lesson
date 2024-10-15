@@ -9,12 +9,13 @@
                 "-g",
                 // "List_int.cpp",
                 // "Main.cpp"
-                "${fileDirname}\\*.cpp",
+                "main.cpp",
+                // "${fileDirname}\\*.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "-Wall",
                 "-static-libgcc",
-                // "-fexec-charset=GBK",
+                "-fexec-charset=GBK",
                 "-std=c++11",
                 "-finput-charset=UTF-8"
             ],
