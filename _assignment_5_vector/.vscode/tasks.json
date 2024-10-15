@@ -9,15 +9,13 @@
                 "-g",
                 // "List_int.cpp",
                 // "Main.cpp"
-                "main.cpp",
-                // "vec.cpp",
-                // "${fileDirname}\\*.cpp",
+                "${fileDirname}\\*.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "-Wall",
                 "-static-libgcc",
-                "-fexec-charset=GBK",
-                "-std=c++17",
+                // "-fexec-charset=GBK",
+                "-std=c++11",
                 "-finput-charset=UTF-8"
             ],
             "group": {
@@ -51,7 +49,7 @@
         {
             "type": "cppbuild",
             "label": "C/C++: g++.exe 生成活动文件",
-            "command": "g++.exe",//本机g++位置
+            "command": "F:\\MinGW64\\bin\\g++.exe",//本机g++位置
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
