@@ -4,13 +4,14 @@
 "-finput-charset=UTF-8"
 */
 #include<bits/stdc++.h>
+#include <cassert>
 #include <conio.h>
 #include<windows.h>
 using std::cin;
 using std::cout;
 using std::endl;
 #include"vec.hpp"
-int col(char msg){
+void col(char msg){
 	if(msg=='r') SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED);//设置红色
 	if(msg=='w') SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY |FOREGROUND_RED |FOREGROUND_GREEN | FOREGROUND_BLUE);//设置三色相加
 	if(msg=='g') SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_GREEN);//设置绿色
@@ -20,6 +21,8 @@ int col(char msg){
 int Pos(char ch, const char *str);
 int Choice(const char *prompt, const char *options="");	// 函数声明,输出提示信息prompt，输入选择的字符并返回。
 void test();
+void constructors_test();
+void calc_test();
 int tot;//向量对象个数
 std::vector< vec<double> >q;
 int main(){
@@ -42,7 +45,7 @@ int main(){
 		cout << "\n\n";
 		if(key==27)		// '\x1b'等于27，指ESC键
 			break;
-		if(key>'3'&&!tot){
+		if(key<'8'&&key>'3'&&!tot){
 			col('r');
 			cout<<"当前不存在任何向量！";
 			col('w');
@@ -198,30 +201,102 @@ int Choice(const char *prompt, const char *options)		// 函数定义。
 	cout << endl;
 	return key;
 }
+/*
+· 直接初始化优化 √
+· 不同类型乘法测试 √
+· 异常抛出测试 
+*/
 void test(){
-	cout<<"运算符重载功能测试"<<endl;
-	vec<double> x(3);
-	x.Rand();
-	vec<double> y(3);
-	y.Rand();
-	cout<<"x="<<x<<endl;
-	cout<<"y="<<y<<endl;
-	vec<double> z;
-	cout<<"x+y="<<x+y<<endl;
-	cout<<"x-y="<<x-y<<endl;
-	cout<<"x*y="<<x*y<<endl;
-	cout<<"x*2="<<x*2<<endl;
-	x*=2;
-	cout<<"x*=2="<<x<<endl;
-	x+=y;
-	cout<<"x+=y="<<x<<endl;
-	x-=y;
-	cout<<"x-=y="<<x<<endl;
-	cout<<"x[1]="<<x[1]<<endl;
-	cout<<"x==y?"<<(x==y)<<endl;
-	cout<<"x!=y?"<<(x!=y)<<endl;
-	cout<<"x.dimension(x.length()):";
-	x.length();x^=y;
-	cout<<"x^=y"<<x<<endl;
-	cout<<"x^y="<<(x^y)<<endl;
+	col('g');
+	cout<<"\t\t运算符重载功能测试"<<endl;
+	col('w');
+
+	col('b');
+	cout<<"\n\t构造函数测试"<<endl;
+	col('w');
+	constructors_test();
+
+	col('b');
+	cout<<"\n\t运算测试"<<endl;
+	col('w');
+	calc_test();
+
+}
+
+void constructors_test()
+{
+	// 正常情况测试
+	col('b');
+	cout<<"正常情况测试："<<endl;
+	col('w');
+	vec<int> v1(5, 10); 
+	col('b');
+	cout<<"v1(5,10):";
+	col('w');
+	cout<<v1<<endl;
+	vec<int> v2(3);
+	col('b');
+	cout<<"v2(3):";
+	col('w');
+	cout<<v2<<endl;
+    // 边界情况测试
+    vec<int> v3(0, 0);
+	col('b');
+	cout<<"v3(0,0)";
+	col('w');
+	cout<<v3<<endl; 
+	vec<int> v12=v1;
+	col('b');
+	cout<<"v12=v1:";
+	col('w');
+	cout<<v12<<endl;
+	//异常情况测试
+    try {
+		col('r');
+		cout<<"异常情况测试1,维度负数:v4(-1,0)"<<endl;
+		col('w');
+        vec<int> v4(-1, 0); 
+    } catch (const char* msg) {
+		cout<<msg<<endl;
+    }
+    try {
+		col('r');
+		cout<<"异常情况测试2,维度过大:v5(101,0)"<<endl;
+		col('w');
+        vec<int> v5(101, 0); 
+    } catch (const char* msg) {
+        cout<<msg<<endl;
+    }
+}
+
+//测试 [],=,+,+=,-,-=,*,*=,==,!=,^,^= 运算符的功能
+void calc_test(){
+	cout<<"v1,v2: v1[0]=1,v1[1]=2,v1[2]=3,v2=v1, 以此对'='和'[]'进行验证"<<endl;
+	vec<int> v1(3);
+    vec<int> v2(3);
+    v1[0] = 1;
+    v1[1] = 2;
+    v1[2] = 3;
+    v2 = v1;
+    // 验证赋值后的元素是否正确
+    col('b'),cout<<"v1:",col('w');
+	cout<<v1<<endl;
+	col('b'),cout<<"v2:",col('w');
+	cout<<v2<<endl;
+	bool flag=0;
+    for (int i = 0; i < 3; i++) {
+        if(v2[i]!=v1[i]) flag=1;
+    }
+    if(flag){
+		col('r');
+		cout<<"异常情况测试3,赋值运算符重载错误"<<endl;
+		col('w');
+	}else{
+		col('g');
+		cout<<"'='和'[]'重载正确"<<endl;
+		col('w');
+	}
+
+	
+
 }
