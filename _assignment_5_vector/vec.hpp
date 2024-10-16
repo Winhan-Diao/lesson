@@ -7,6 +7,11 @@ using std::ostream;
 using std::cin;
 using std::cout;
 using std::endl;
+/*
+向量夹角
+向量模长
+0向量
+*/
 template<typename T>
 class vec
 {

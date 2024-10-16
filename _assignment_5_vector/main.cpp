@@ -217,7 +217,7 @@ int Choice(const char *prompt, const char *options)		// 函数定义。
 /*
 · 直接初始化优化 √
 · 不同类型乘法测试 √
-· 异常抛出测试 
+· 异常抛出测试 √
 */
 void test(){
 	while(1){
