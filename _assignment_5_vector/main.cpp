@@ -56,6 +56,7 @@ int main(){
 		switch (key)
 		{
 		case '1':{
+			cout << "1 --- 创建一个随机维度随机值的向量" << endl;
 			vec<double> x(rand()%10+1);
 			x.Rand();
 			q.push_back(x);	
@@ -63,6 +64,7 @@ int main(){
 			break;			
 		}
 		case '2':{
+			cout << "2 --- 创建一个指定维度的向量" << endl;
 			col('g');
 			cout<<"输入一个不超过100的正整数n:";
 			col('w');
@@ -80,6 +82,7 @@ int main(){
 			break;
 		}
 		case '3':{
+			cout << "3 --- 直接创建一个指定维度的向量并设定各维度值" << endl;
 			col('g');
 			cout<<"输入一个不超过100的正整数n:";
 			col('w');
@@ -99,6 +102,7 @@ int main(){
 			break;
 		}
 		case '4':{
+			cout << "4 --- 为已经创建的向量的各个维度值进行设置" << endl;
 			int p;
 			col('g');
 			cout<<"请选择向量编号(编号从1开始)：";
@@ -117,6 +121,7 @@ int main(){
 			break;
 		}
 		case '5':{
+			cout << "5 --- 为已经存在的向量随机设值" << endl;
 			int p;
 			col('g');
 			cout<<"请选择向量编号(编号从1开始)：";
@@ -133,7 +138,8 @@ int main(){
 			q[p-1].Rand();				
 			break;
 		}
-		case '6':{			
+		case '6':{		
+			cout<< "6 --- 展示指定编号的向量" <<endl;	
 			int p;
 			col('g');
 			cout<<"请选择向量编号(编号从1开始)：";
@@ -151,6 +157,7 @@ int main(){
 			break;
 		}
 		case '7':{
+			cout<< "7 --- 展示所有存在的向量" <<endl;
 			int i=0;
 			for(auto x: q){
 				cout<<"编号"<<++i<<"的向量：\n";
@@ -253,6 +260,7 @@ void test(){
 
 void IN_test(){
 	try{
+		col('b'),cout<<"输入两个向量：(直接输入 '维度 各维度值')"<<endl,col('w');
 		vec<int> v1,v2;
 		cin>>v1>>v2;
 		col('b'),cout<<"v1 v2:",col('w');
