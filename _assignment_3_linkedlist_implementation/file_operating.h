@@ -96,7 +96,7 @@ inline std::string getCurrentAbsolutePath() {
     GetModuleFileNameA(NULL, buffer, PATHSTR_LENGTH);       // Windows API函数，用于获得当前执行模块的绝对路径。
     std::string strBuffer(buffer);
     std::string::size_type pos = strBuffer.find_last_of("\\/");
-    return strBuffer.substr(0, pos + 1);        // 💩山实现，不要学
+    return strBuffer.substr(0, pos + 1);
 }
 
 inline void toPath(std::string& dirOrPath) {
@@ -106,7 +106,7 @@ inline void toPath(std::string& dirOrPath) {
 
 template <class F>
 void WriteHashInfoFilesTraversing<F>::fileOperating() {
-    std::cout << "findFileDataA.cFileName: " << findFileDataA.cFileName << "\r\n";      //debug
+    std::cout << "[Hash] " << findFileDataA.cFileName << "\r\n";      //debug
     if (std::ifstream ifs{traversingPath + findFileDataA.cFileName, std::ios::binary | std::ios::ate}) {
         size_t size = ifs.tellg();
         ifs.seekg(0);
