@@ -11,6 +11,7 @@ public：
     构造函数1：无参数构造
     构造函数2：由C数组构造
     拷贝构造函数
+    移动构造函数
     #常量实例# []重载
     []重载
     #常量实例# at：获取元素
@@ -19,6 +20,7 @@ public：
     %虚% popBack：删除末元素
     %纯虚% +=(AbstractVector)重载
     %纯虚% <<(size_t)重载
+    %虚% 取首个/尾个（常量）（逆向）迭代器
     %虚% 析构函数
 */
 
@@ -46,10 +48,8 @@ protected:
         else
             ++volume;
         T *neoData = a_t_t::allocate(alloc, volume);
-        // for (size_t i = size; i < volume: ++i) a_t_t::construct(alloc, &neoData[i]);       // just to ensure, no, donot do this.
         if (data)
-            std::memcpy(neoData, data, size * sizeof(T));
-        // delete[] data;
+            std::copy(data, data + size, neoData);
         for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
         a_t_t::deallocate(alloc, data, size);
         data = neoData;
@@ -58,10 +58,37 @@ public:
     AbstractVector(): data(nullptr), size(0), volume(0) {}
     AbstractVector(T* const& data, size_t size): data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
         if (data)
-            std::memcpy(this->data, data, size * sizeof(T));
+            std::copy(data, data + size, this->data);
     }
     AbstractVector(const AbstractVector& v): alloc(v.alloc), data(a_t_t::allocate(alloc, v.volume)), size(v.size), volume(v.volume) {
         for (size_t i = 0; i < size; ++i) a_t_t::construct(alloc, &data[i], v.data[i]);
+    }
+    AbstractVector(AbstractVector&& v): alloc(std::move(v.alloc)), data(v.data), size(v.size), volume(v.volume) {
+        v.data = nullptr;
+        v.size = 0;
+        v.volume = 0;
+    }
+    AbstractVector& operator= (const AbstractVector& v) {
+        if (data == v.data) return *this;
+        for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
+        a_t_t::deallocate(alloc, data, volume);     // can improve, actually
+        data = a_t_t::allocate(alloc, v.volume);
+        std::copy(v.cbegin(), v.cend(), begin());
+        size = v.size;
+        volume = v.volume;
+        return *this;
+    }
+    AbstractVector& operator= (AbstractVector&& v) {
+        if (data == v.data) return *this;
+        for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
+        a_t_t::deallocate(alloc, data, volume);
+        data = v.data;
+        size = v.size;
+        volume = v.volume;
+        v.data = nullptr;
+        v.size = 0;
+        v.volume = 0;
+        return *this;
     }
     const T& operator[] (size_t index) const noexcept {      // 常量实例的访问，无检查与异常
         return data[index];
@@ -103,7 +130,6 @@ public:
     virtual AbstractVectorReversedIterator<const T> crend() const { return AbstractVectorReversedIterator<const T>(size? data - 1: data); }
 
     virtual ~AbstractVector() noexcept {
-        // delete[] data;
         for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
         a_t_t::deallocate(alloc, data, size);
     }
@@ -203,10 +229,8 @@ std::ostream& operator<<(std::ostream& os, const AbstractVector<_T>& v) {
         os << v[i];
         if (i < v.size - 1) 
             os << ", ";
-        else
-            os << ']';
     }
-    os << "; v: " << v.volume << "; s: " << v.size << '}';
+    os << "]; v: " << v.volume << "; s: " << v.size << '}';
     return os;
 }
 
@@ -243,13 +267,26 @@ int main() {
     v2.pushBack('%');
     std::cout << v2 << "\r\n";
 
+    std::cout << "inversed order: "; 
     std::for_each(v2.crbegin(), v2.crend(), [](auto& v){
         std::cout << v << ' ';
     });
     std::cout << "\r\n";
 
-    v2[1];
+    std::cout << "v2[1]: " << v2[1] << "\r\n";
+    v2[1] = '=';
+    std::cout << "v2[1]: " << v2[1] << "\r\n";
 
+    v = std::move(v2);
+
+    std::cout << "v: " << v << "\r\n";
+    std::cout << "v2: " << v2 << "\r\n";
+
+    char str3[] = {"String 3"};
+    DebugVector<char> v3(str3, 8);
+    std::cout << v3 << "\r\n";
+    v3 = v;
+    std::cout << v3 << "\r\n";
 
     return 0;
 }
