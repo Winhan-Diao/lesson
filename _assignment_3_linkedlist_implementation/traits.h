@@ -1,5 +1,5 @@
 #pragma once
-
+#include<type_traits>
 template <class T, class... Args>
 struct can_take {       // 编译时执行，如果T能接Args...为参数，就返回真，否则假
 private:

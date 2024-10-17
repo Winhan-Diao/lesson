@@ -1,4 +1,5 @@
 {
+// <<<<<<< HEAD
 	"version": "2.0.0",
 	"tasks": [
 		{
@@ -29,4 +30,78 @@
 			// "detail": "compiler: C:\\Program Files\\CodeBlocks\\MinGW\\bin\\g++.exe"
 		}
 	]
+// =======
+//     "version": "2.0.0",
+//     "tasks": [
+//         {
+//             "label": "build",
+//             "type": "shell",
+//             "command": "g++",
+//             "args": [
+//                 "-g",
+//                 // "List_int.cpp",
+//                 // "main.cpp",
+//                 "_assignment_5_vector/main.cpp",
+//                 // "_assignment_3_linkedlist_implementation/file_operating.cpp",
+//                 // "_assignment_3_linkedlist_implementation/main.cpp",
+//                 // "_assignment_3_linkedlist_implementation/thread_pool.cpp",
+//                 // "*.cpp",
+//                 "-o",
+//                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
+//                 "-Wall",
+//                 "-static-libgcc",
+//                 "-fexec-charset=GBK",
+//                 "-std=c++17",
+//                 "-finput-charset=UTF-8"
+//             ],
+//             "group": {
+//                 "kind": "build",
+//                 "isDefault": true
+//             },
+//             "presentation": {
+//                 "echo": true,
+//                 "reveal": "always",
+//                 "focus": false,
+//                 "panel": "new"
+//             },
+//             "problemMatcher": "$gcc"
+//         },
+//         {
+//             "label": "run",
+//             "type": "shell",
+//             "dependsOn": "build",
+//             "command": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+//             "group": {
+//                 "kind": "test",
+//                 "isDefault": true
+//             },
+//             "presentation": {
+//                 "echo": true,
+//                 "reveal": "always",
+//                 "focus": true,
+//                 "panel": "new"
+//             }
+//         },
+//         {
+//             "type": "cppbuild",
+//             "label": "C/C++: g++.exe 生成活动文件",
+//             "command": "F:\\MinGW64\\bin\\g++.exe",
+//             "args": [
+//                 "-fdiagnostics-color=always",
+//                 "-g",
+//                 "${file}",
+//                 "-o",
+//                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
+//             ],
+//             "options": {
+//                 "cwd": "${fileDirname}"
+//             },
+//             "problemMatcher": [
+//                 "$gcc"
+//             ],
+//             "group": "build",
+//             "detail": "调试器生成的任务。"
+//         }
+//     ]
+// >>>>>>> f2a98a0f27b392bba611f5f89c643e9f64393448
 }

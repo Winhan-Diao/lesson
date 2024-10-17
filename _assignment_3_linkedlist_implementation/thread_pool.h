@@ -9,6 +9,10 @@
 #include <condition_variable>
 #include "linkedlist/LinkList.h"
 
+namespace tests {
+    static double s, t;
+}
+
 class ThreadPool {
 private:
     size_t threadCounts;        // 线程池的线程数量

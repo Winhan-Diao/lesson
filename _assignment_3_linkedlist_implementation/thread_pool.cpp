@@ -36,4 +36,7 @@ ThreadPool::~ThreadPool() noexcept {
     cv.notify_all();        // 唤醒所有处于代码块（8-16行）的线程，告诉它线程池丸辣（其实就一个线程在那个代码块中）
     for (auto& _thread: threads)        // 确保所有线程都似了
         _thread.join();
+    tests::t=clock();
+    double a=tests::s,b=tests::t;
+    printf("costing time : %.2lf ms",b-a);
 }
