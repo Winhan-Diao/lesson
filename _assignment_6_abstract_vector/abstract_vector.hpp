@@ -2,6 +2,7 @@
 #include <cstring>
 #include <algorithm>
 #include <memory>
+#include "c_alloc_allocator.hpp"
 
 /*
 函数&方法：
@@ -30,7 +31,7 @@ class AbstractVectorIterator;
 template <class T>
 class AbstractVectorReversedIterator;
 
-template <class T, class Alloc = std::allocator<T>>
+template <class T, class Alloc = std::allocator<T>, typename = std::enable_if_t<std::is_copy_constructible_v<T> || std::is_move_constructible_v<T>>>
 class AbstractVector {
 public:
     using value_type = T;
@@ -47,16 +48,21 @@ protected:
             volume *= 1.5;
         else
             ++volume;
-        T *neoData = a_t_t::allocate(alloc, volume);
-        if (data)
-            std::copy(data, data + size, neoData);
-        for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
-        a_t_t::deallocate(alloc, data, size);
-        data = neoData;
+        if constexpr (std::is_same_v<Alloc, CAllocAllocator<T>>) {
+            std::cout << "CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
+            alloc.reallocate(data, volume);
+        } else {
+            T *neoData = a_t_t::allocate(alloc, volume);
+            if (data)
+                std::move(data, data + size, neoData);
+            for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
+            a_t_t::deallocate(alloc, data, size);
+            data = neoData;
+        }
     }
 public:
     AbstractVector(): data(nullptr), size(0), volume(0) {}
-    AbstractVector(T* const& data, size_t size): data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
+    AbstractVector(T* const& data, size_t size): alloc(), data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
         if (data)
             std::copy(data, data + size, this->data);
     }
@@ -118,8 +124,8 @@ public:
             --size;
         }
     }
-    virtual AbstractVector<T>& operator+=(const AbstractVector<T>&) = 0;       // vector:数值加；string:追加
-    virtual AbstractVector<T>& operator<<(long long) = 0;       // vector:移位；string:追加数字
+    virtual AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) = 0;       // vector:数值加；string:追加
+    virtual AbstractVector<T, Alloc>& operator<<(long long) = 0;       // vector:移位；string:追加数字
     virtual AbstractVectorIterator<T> begin() { return AbstractVectorIterator<T>(&data[0]); }
     virtual AbstractVectorIterator<const T> cbegin() const { return AbstractVectorIterator<const T>(&data[0]); }
     virtual AbstractVectorIterator<T> end() { return AbstractVectorIterator<T>(&data[size]); }
@@ -134,17 +140,17 @@ public:
         a_t_t::deallocate(alloc, data, size);
     }
     friend int main();
-    template <class _T>
-    friend std::ostream& operator<<(std::ostream&, const AbstractVector<_T>&);
+    template <class _T, class _Alloc>
+    friend std::ostream& operator<<(std::ostream&, const AbstractVector<_T, _Alloc>&);
 };
 
-template <class T>
-class DebugVector: public AbstractVector<T> {
+template <class T, class Alloc = std::allocator<T>>
+class DebugVector: public AbstractVector<T, Alloc> {
 public:
     DebugVector() = default;
-    DebugVector(T* const& data, size_t size): AbstractVector<T>(data, size) {}
-    virtual AbstractVector<T>& operator+=(const AbstractVector<T>&) { return *this; }       // vector:数值加；string:追加
-    virtual AbstractVector<T>& operator<<(long long) { return *this; }       // vector:移位；string:追加数字
+    DebugVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
+    AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) override { return *this; }       // vector:数值加；string:追加
+    AbstractVector<T, Alloc>& operator<<(long long) override { return *this; }       // vector:移位；string:追加数字
 };
 
 template <class T>
@@ -222,8 +228,8 @@ public:
     bool operator>=(const AbstractVectorReversedIterator& i) const { return this->ptr <= i.ptr; };
 };
 
-template <class _T>
-std::ostream& operator<<(std::ostream& os, const AbstractVector<_T>& v) {
+template <class _T, class _Alloc>
+std::ostream& operator<<(std::ostream& os, const AbstractVector<_T, _Alloc>& v) {
     os << '{' << '[';
     for (size_t i = 0; i < v.size; ++i) {
         os << v[i];
@@ -232,61 +238,4 @@ std::ostream& operator<<(std::ostream& os, const AbstractVector<_T>& v) {
     }
     os << "]; v: " << v.volume << "; s: " << v.size << '}';
     return os;
-}
-
-int main() {
-    char str[]{"qwert"};
-    DebugVector<char> v(str, 4);
-    std::cout << v << "\r\n";
-
-    v.pushBack('F');
-    std::cout << v << "\r\n";
-
-    v.pushBack('D');
-    std::cout << v << "\r\n";
-
-    v.pushBack('O');
-    std::cout << v << "\r\n";
-
-    DebugVector<char> v2 = v;
-    std::cout << v2 << "\r\n";
-
-    v2.popBack();
-    std::cout << v2 << "\r\n";
-
-    auto iter = v2.begin();
-    *iter = '$';
-    std::cout << v2 << "\r\n";
-
-    std::reverse(v2.begin(), v2.end());
-    std::cout << v2 << "\r\n";
-
-    v2.pushBack('^');
-    v2.pushBack('\\');
-    v2.pushBack('*');
-    v2.pushBack('%');
-    std::cout << v2 << "\r\n";
-
-    std::cout << "inversed order: "; 
-    std::for_each(v2.crbegin(), v2.crend(), [](auto& v){
-        std::cout << v << ' ';
-    });
-    std::cout << "\r\n";
-
-    std::cout << "v2[1]: " << v2[1] << "\r\n";
-    v2[1] = '=';
-    std::cout << "v2[1]: " << v2[1] << "\r\n";
-
-    v = std::move(v2);
-
-    std::cout << "v: " << v << "\r\n";
-    std::cout << "v2: " << v2 << "\r\n";
-
-    char str3[] = {"String 3"};
-    DebugVector<char> v3(str3, 8);
-    std::cout << v3 << "\r\n";
-    v3 = v;
-    std::cout << v3 << "\r\n";
-
-    return 0;
 }
