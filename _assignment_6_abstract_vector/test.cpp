@@ -70,5 +70,8 @@ int main() {
     v4.pushBack(0.001);
     std::cout << v4 << "\r\n";
 
+    DebugVector<std::size_t, CAllocAllocator<std::size_t>> test1;
+    // DebugVector<std::string, CAllocAllocator<std::string>> test2;        //invalid
+
     return 0;
 }

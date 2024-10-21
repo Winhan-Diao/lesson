@@ -2,12 +2,13 @@
 #include <cstring>
 #include <algorithm>
 #include <memory>
+#include <type_traits>
 #include "c_alloc_allocator.hpp"
 
 /*
 函数&方法：
 protected:
-    expand：一次性扩展向量1.5倍，注意是volume变不是size变
+    expand：一次性扩展向量1.5倍，注意是volume变不是size变。
 public：
     构造函数1：无参数构造
     构造函数2：由C数组构造
@@ -31,7 +32,7 @@ class AbstractVectorIterator;
 template <class T>
 class AbstractVectorReversedIterator;
 
-template <class T, class Alloc = std::allocator<T>, typename = std::enable_if_t<std::is_copy_constructible_v<T> || std::is_move_constructible_v<T>>>
+template <class T, class Alloc = std::allocator<T>, typename = std::enable_if_t<(std::is_copy_constructible_v<T> || std::is_move_constructible_v<T>) && (!std::is_same_v<Alloc, CAllocAllocator<T>> || std::is_trivially_copyable_v<T>)>>
 class AbstractVector {
 public:
     using value_type = T;
@@ -49,7 +50,7 @@ protected:
         else
             ++volume;
         if constexpr (std::is_same_v<Alloc, CAllocAllocator<T>>) {
-            std::cout << "CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
+            std::cout << "[debug] CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
             alloc.reallocate(data, volume);
         } else {
             T *neoData = a_t_t::allocate(alloc, volume);
