@@ -44,11 +44,15 @@ protected:
     T *data;
     size_t size;
     size_t volume;
-    virtual void expand() {     // 一次性扩展向量1.5倍，而不是pushBack一个扩展一个
-        if (volume)
-            volume *= 1.5;
-        else
-            ++volume;
+    virtual void expand(size_t requestedExtra = 0) {     // 一次性扩展向量1.5倍，而不是pushBack一个扩展一个
+        if (requestedExtra) {
+            volume += requestedExtra;
+        } else {
+            if (volume)
+                volume *= 1.5;
+            else
+                ++volume;
+        }
         if constexpr (std::is_same_v<Alloc, CAllocAllocator<T>>) {
             std::cout << "[debug] CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
             alloc.reallocate(data, volume);
@@ -127,6 +131,14 @@ public:
     }
     virtual AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) = 0;       // vector:数值加；string:追加
     virtual AbstractVector<T, Alloc>& operator<<(long long) = 0;       // vector:移位；string:追加数字
+    virtual AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, Alloc>& v) {     //string可以重写该函数实现'\0'的兼容
+        if (this->volume < (this->size + v.size)) {
+            this->expand(this->size + v.size - this->volume);
+        }
+        std::copy(v.cbegin(), v.cend(), this->end());
+        this->size += v.size;
+        return *this;
+    }
     virtual AbstractVectorIterator<T> begin() { return AbstractVectorIterator<T>(&data[0]); }
     virtual AbstractVectorIterator<const T> cbegin() const { return AbstractVectorIterator<const T>(&data[0]); }
     virtual AbstractVectorIterator<T> end() { return AbstractVectorIterator<T>(&data[size]); }
@@ -152,6 +164,7 @@ public:
     DebugVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) override { return *this; }       // vector:数值加；string:追加
     AbstractVector<T, Alloc>& operator<<(long long) override { return *this; }       // vector:移位；string:追加数字
+    AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, Alloc>& v) override { return AbstractVector<T, Alloc>::operator<<(v); }
 };
 
 template <class T>

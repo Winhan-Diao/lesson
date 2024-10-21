@@ -70,8 +70,16 @@ int main() {
     v4.pushBack(0.001);
     std::cout << v4 << "\r\n";
 
-    DebugVector<std::size_t, CAllocAllocator<std::size_t>> test1;
+    DebugVector<std::size_t, CAllocAllocator<std::size_t>> test1;       //valid
     // DebugVector<std::string, CAllocAllocator<std::string>> test2;        //invalid
+
+    DebugVector<char> v5("Hello     ", 10);
+    v5.pushBack(' ');
+    std::cout << v5 << "\r\n";
+    DebugVector<char> v6("W", 1);
+    std::cout << v6 << "\r\n";
+    v5 << v6;
+    std::cout << v5 << "\r\n";
 
     return 0;
 }
