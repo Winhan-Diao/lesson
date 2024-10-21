@@ -41,7 +41,7 @@ int main(){
 		cout << "5 --- 为已经存在的向量随机设值" << endl;
 		cout<< "6 --- 展示指定编号的向量" <<endl;
 		cout<< "7 --- 展示所有存在的向量" <<endl;
-		cout<< "a --- 测试向量运算符重载<<,>>,+,+=,-,-=,*,*=,[],==,!=,^,^="<<endl;
+		cout<< "a --- 测试向量运算符重载<<,>>,+,+=,-,-=,*,*=,[],==,!=,^,^=和其它运算函数"<<endl;
 		key = Choice("\n请选择", "1234567a\x1b");
 		cout << "\n\n";
 		if(key==27)		// '\x1b'等于27，指ESC键
@@ -322,10 +322,11 @@ void constructors_test()
 
 //测试 [],=,+,+=,-,-=,*,*=,==,!=,^,^= 运算符的功能
 void calc_test(){
-	col('b'),cout<<"\n\t1. v1,v2: v1[0]=1,v1[1]=2,v1[2]=3,v2=v1, 以此对'='和'[]'进行验证"<<endl,col('w');
+	col('b'),cout<<"\n\t1. v1,v2: v1[0]=1,v1[1]=2,v1[2]=3,v2=v1,v4=0 以此对'='和'[]'进行验证"<<endl,col('w');
 	vec<int> v1(3);
     vec<int> v2(3);
 	vec<int> v3(4,1);
+	vec<int> v4(0);
     v1[0] = 1;
     v1[1] = 2;
     v1[2] = 3;
@@ -363,6 +364,7 @@ void calc_test(){
 	col('b'),cout<<"v1:",col('w'),cout<<v1<<endl;
 	col('b'),cout<<"v2:",col('w'),cout<<v2<<endl;
 	col('b'),cout<<"v3:",col('w'),cout<<v3<<endl;
+	col('b'),cout<<"v4:",col('w'),cout<<v4<<endl;
 	//正常使用测试 
 	col('b'),cout<<"v1+v2:",col('w');
 	cout<<v1+v2<<endl;
@@ -374,7 +376,21 @@ void calc_test(){
 	col('b'),cout<<"v1-=v2:",col('w');
 	v1-=v2;
 	cout<<v1<<endl;
-	
+	col('b'),cout<<"v1+v4:",col('w');
+	cout<<v1+v4<<endl;
+	col('b'),cout<<"v1+=v4",col('w');
+	cout<<v1<<endl;
+	col('b'),cout<<"v1-v4",col('w');
+	cout<<v1-v4<<endl;
+	col('b'),cout<<"v1-=v4",col('w');
+	v1-=v4;
+	cout<<v1<<endl;
+	col('b'),cout<<"v4-=v1",col('w');
+	v4-=v1;
+	cout<<v4<<endl;
+	col('b'),cout<<"v4-=v4",col('w');
+	v4-=v4;
+	cout<<v4<<endl;
 	//异常使用测试
 	try{
 		col('r');
@@ -432,7 +448,13 @@ void calc_test(){
 	col('b'),cout<<"v1:",col('w'),cout<<v1<<endl;
 	col('b'),cout<<"v2:",col('w'),cout<<v2<<endl;
 	col('b'),cout<<"v3:",col('w'),cout<<v3<<endl;
+	col('b'),cout<<"v4:",col('w'),cout<<v4<<endl;
 	//正常使用测试
+	col('b'),cout<<"v4*0:",col('w');
+	cout<<v4*0<<endl;
+	col('b'),cout<<"v4=v4*v1",col('w');
+	v4=v4*v1;
+	cout<<v4<<endl;
 	col('b'),cout<<"v1*2,2*v1:",col('w');
 	cout<<v1*2<<','<<2*v1<<endl;
 	col('b'),cout<<"v1*=2:",col('w');
@@ -505,6 +527,41 @@ void calc_test(){
 		col('w');
 	}
 	
+	col('b'),cout<<"\n\t6.测试angle()和modoules()运算"<<endl,col('w');
+	v1[0]=1,v1[1]=1,v1[2]=1;
+	col('b'),cout<<"v1:",col('w'),cout<<v1<<endl;
+	col('b'),cout<<"v2:",col('w'),cout<<v2<<endl;
+	col('b'),cout<<"v3:",col('w'),cout<<v3<<endl;
+	col('b'),cout<<"v4:",col('w'),cout<<v4<<endl;
+	col('b'),cout<<"angle(v1,v2):",col('w');
+	cout<<angle(v1,v2)<<endl;
+	col('b'),cout<<"angle(v1,v4):",col('w');
+	cout<<angle(v1,v4)<<endl;
+	try{
+		col('r');
+		cout<<"异常情况测试7,'angle()'维度不适用:v1.angle(v3)"<<endl;
+		col('w');
+		angle(v1,v3);
+		flag=1;
+	}catch(const char* msg){
+		cout<<msg<<endl;
+		flag=0;
+	}
+	if(flag){
+		col('r');
+		cout<<"'angle()'运算符重载错误"<<endl;
+		col('w');
+	}else{
+		col('g');
+		cout<<"'angle()'重载正确"<<endl;
+		col('w');
+	}
+	col('b'),cout<<"v1.modoules():",col('w');
+	cout<<v1.modoules()<<endl;
+	col('b'),cout<<"v2.modoules():",col('w');
+	cout<<v2.modoules()<<endl;
+	col('b'),cout<<"v3.modoules():",col('w');
+	cout<<v3.modoules()<<endl;
 	col('g'),
 	cout<<"\n\t~测试完成~"<<endl;
 	col('w');

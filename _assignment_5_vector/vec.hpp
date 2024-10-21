@@ -1,4 +1,12 @@
 //vec.hpp 由于模板类无法分离编译，采用hpp方法进行模板类的声明和定义
+/*
+关于此向量的一些额外说明：
+1. 向量的维度不能超过100
+2. 向量的维度不能为0
+3. 0向量专指0维向量，如果是一个n维度向量但值均为0，它仍是一个n维度向量，而不是0向量，
+所以仍然不可以参与n维度以外的运算，所以只有当它*0是它成为0向量。这样的设定是因为初始化时
+允许一个所有值为0的n维度向量存在，它被保留默认为一个n维向量以供后续使用。
+*/
 #ifndef VEC_H
 #define VEC_H
 #include<iostream>
@@ -38,6 +46,8 @@ public:
 	template<typename Ts> friend istream &operator>>(istream &in,vec<Ts> &a);
 	template<typename Ts> friend ostream &operator<<(ostream &out,const vec<Ts> &a);
 	int length()const;
+	double modoules()const;
+	template<class Ts> friend double angle(const vec<Ts> &a,const vec<Ts> &b);
 	void Rand();
 	void Set();
 	void show()const;
@@ -55,6 +65,7 @@ inline vec<T>::vec(const int &length, const T &x)
 	}
 	p=new T[dimension];
 	for(int i=0;i<dimension;i++) p[i]=x;
+
 }
 
 vecT::vec(const vec &a)
@@ -77,9 +88,13 @@ vecT &vec<T>::operator=(const vec &a)
 	return *this;
 }
 vecT vec<T>::operator+(const vec&a)const{
-	if(a.dimension!=dimension){
+	if(a.dimension!=dimension&&a.dimension!=0&&dimension!=0){
 		throw "Add vectors of Different Dimension";
 	}
+	if(a.dimension==0){
+		return *this;
+	}
+	if(dimension==0) return a;
 	vec temp=a;
 	for(int i=0;i<dimension;i++){
 		temp.p[i]+=a.p[i];
@@ -88,8 +103,18 @@ vecT vec<T>::operator+(const vec&a)const{
 }
 vecT vec<T>::operator-(const vec &a) const
 {
-	if(a.dimension!=dimension){
+	if(a.dimension!=dimension&&a.dimension!=0&&dimension!=0){
 		throw "Minus vectors of Different Dimension";
+	}
+	if(a.dimension==0){
+		return *this;
+	}
+	if(dimension==0) {
+		vec temp=a;
+		for(int i=0;i<dimension;i++){
+			temp.p[i]=-a.p[i];
+		}
+		return temp;
 	}
 	vec temp=*this;
 	for(int i=0;i<dimension;i++){
@@ -99,8 +124,18 @@ vecT vec<T>::operator-(const vec &a) const
 }
 vecT &vec<T>::operator+=(const vec &a) 
 {
-	if(a.dimension!=dimension){
+	if(a.dimension!=dimension&&a.dimension!=0&&dimension!=0){
 		throw "Add vectors of Different Dimension";
+	}
+	if(a.dimension==0) return *this;
+	if(dimension==0) {
+		delete []p;
+		dimension=a.dimension;
+		p=new T[dimension];
+		for(int i=0;i<dimension;i++){
+			p[i]=a.p[i];
+		}
+		return *this;
 	}
 	for(int i=0;i<dimension;i++)
 	{
@@ -110,8 +145,18 @@ vecT &vec<T>::operator+=(const vec &a)
 }
 vecT &vec<T>::operator-=(const vec &a) 
 {
-	if(a.dimension!=dimension){
+	if(a.dimension!=dimension&&a.dimension!=0&&dimension!=0){
 		throw "Minus vectors of Different Dimension";
+	}
+	if(a.dimension==0) return *this;
+	if(dimension==0) {
+		delete []p;
+		dimension=a.dimension;
+		p=new T[dimension];
+		for(int i=0;i<dimension;i++){
+			p[i]=-a.p[i];
+		}
+		return *this;
 	}
 	for(int i=0;i<dimension;i++)
 	{
@@ -123,9 +168,11 @@ typeT
 T vec<T>::operator*(const vec &a) const
 {
 	T temp=0;
-	if(a.dimension!=dimension){
+	if(a.dimension!=dimension&&a.dimension!=0&&dimension!=0){
 		throw "Multiply vectors of Different Dimension";
 	}
+	if(a.dimension==0) return 0;
+	if(dimension==0) return 0;
 	for(int i=0;i<dimension;i++){
 		temp+=p[i]*a.p[i];
 	}
@@ -134,6 +181,9 @@ T vec<T>::operator*(const vec &a) const
 
 template<class Ts,class T>vec<T> operator*(const Ts &a, const vec<T> &v) 
 {
+	if(a==0){
+		return vec<T>(0);
+	}
 	vec<T> temp=v;
 	for(int i=0;i<v.dimension;i++){
 		temp.p[i]*=a;
@@ -144,6 +194,9 @@ template<class Ts,class T>vec<T> operator*(const Ts &a, const vec<T> &v)
 template <typename T>
 vec<T> vec<T>::operator*(const T &a) const
 {
+	if(a==0){
+		return vec<T>(0);
+	}
 	vec<T> temp=*this;
 	for(int i=0;i<dimension;i++){
 		temp.p[i]*=a;
@@ -154,6 +207,12 @@ vec<T> vec<T>::operator*(const T &a) const
 template <typename T>
 vec<T> &vec<T>::operator*=(const T &a)
 {
+	if(a==0){
+		delete []p;
+		dimension=0;
+		p=NULL;
+		return *this;
+	}
 	for(int i=0;i<dimension;i++){
 		p[i]*=a;
 	}
@@ -236,12 +295,33 @@ ostream &operator<<(ostream &out,const vec<T> &a)
 	out<<")_{"<<a.dimension<<'}';
 	return out;
 }
+template <class T>
+inline double angle(const vec<T> &a, const vec<T> &b)// 计算两个向量的夹角，单位rad
+{
+	double amod=a.modoules(),bmod=b.modoules();
+	if(a.dimension!=b.dimension&&a.dimension!=0&&b.dimension!=0) throw "Error Dimension number!";
+	if(a.dimension==0||b.dimension==0||bmod==0||amod==0) return 0;
+	double temp=1.0*a*b/(amod*bmod);
+	if(temp>1) temp=1;
+	else if(temp<-1) temp=-1;
+	return acos(temp);
+}
 template <typename T>
 inline int vec<T>::length() const
 {
 	return dimension;
 }
-typeT void vec<T>::Set() 
+template <typename T>
+inline double vec<T>::modoules() const
+{
+	if(!dimension) return 0;
+	double temp=0;
+	for(int i=0;i<dimension;i++){
+		temp+=p[i]*p[i];
+	}
+	return sqrt(temp);
+}
+typeT void vec<T>::Set()
 {
 	printf("请输入%d个向量值\n",dimension);
 	int temp=0;
