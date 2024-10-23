@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iterator>
 #include "abstract_vector.hpp"
 
 class NoCpyMov {
@@ -92,9 +93,28 @@ int main() {
     v.clear();
     std::cout << v << "\r\n";
     v.pushBack('^');
-    v.pushBack('_');
-    v.pushBack('^');
+    v.pushBack('-');
+    v.pushBack('v');
     std::cout << v << "\r\n";
+
+    auto t = v.erase(v.begin());
+    std::cout << *t << " & " << v << "\r\n";
+    v.erase(v.begin());
+    std::cout << *t << " & " << v << "\r\n";
+    v.erase(v.begin());
+    std::cout << *t << " & " << v << "\r\n";        // t is end() here, actually not dereferenceable
+    v.pushBack('d');
+    std::cout << v << "\r\n";
+    v.pushBack('o');
+    std::cout << v << "\r\n";
+
+    DebugVector<char> v1("This is a test about erase @^@", 30);
+    auto iterF = v1.begin();
+    std::advance(iterF, 7);
+    auto iterE = v1.begin();
+    std::advance(iterE, 20);
+    v1.erase(iterF, iterE);
+    std::cout << v1 << "\r\n";
     // archived1();
     return 0;
 }
