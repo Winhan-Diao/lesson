@@ -51,7 +51,7 @@ protected:
         } else {
             volume = 1.5 * volume + 1;
         }
-        if constexpr (std::is_same_v<Alloc, CAllocAllocator<T>>) {
+        if constexpr (std::is_same_v<allocator_type, CAllocAllocator<T>>) {
             std::cout << "[debug] CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
             alloc.reallocate(data, volume);
         } else {
@@ -136,6 +136,30 @@ public:
         size = 0;
         volume = 0;
     }
+    AbstractVectorIterator<T> erase(AbstractVectorIterator<T> first, AbstractVectorIterator<T> last) {      // passing last exceeding end() is invalidated
+        if (first < last) {
+            if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>)
+                std::memcpy(reinterpret_cast<void *>(first.operator->()), reinterpret_cast<void *>(last.operator->()), sizeof(value_type) * (end() - last));
+            else 
+                std::move(last, end(), first);
+            for (size_t i = size - (last - first); i < size; ++i) a_t_t::destroy(alloc, &data[size - 1]);
+            size -= last - first;
+        }
+        return first;
+    }
+    AbstractVectorIterator<T> erase(AbstractVectorIterator<T> pos) {        // passing end() as pos is invalidated, which is the same policy as the std::vector
+        AbstractVectorIterator<T> nextPos = pos + 1;
+        if (pos < end()) {
+            if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>)
+                std::memcpy(reinterpret_cast<void *>(pos.operator->()), reinterpret_cast<void *>(nextPos.operator->()), sizeof(value_type) * (end() - nextPos));
+            else 
+                std::move(nextPos, end(), pos);
+            a_t_t::destroy(alloc, &data[size - 1]);
+            --size;
+        }
+        return pos;
+    }
+
     virtual AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) = 0;       // vector:数值加；string:追加
     virtual std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const = 0;       // vector:数值加；string:追加
     virtual AbstractVector<T, Alloc>& operator<<(long long) = 0;       // vector:移位；string:追加数字
@@ -213,6 +237,14 @@ public:
         auto tmp = *this;
         --ptr;
         return tmp;
+    }
+    AbstractVectorIterator& operator+= (ssize_t n) {
+        ptr += n;
+        return *this;
+    }
+    AbstractVectorIterator& operator-= (ssize_t n) {
+        ptr -= n;
+        return *this;
     }
     AbstractVectorIterator operator+(std::ptrdiff_t n) const { return AbstractVectorIterator(ptr + n); }
     AbstractVectorIterator operator-(std::ptrdiff_t n) const { return AbstractVectorIterator(ptr - n); }
