@@ -13,7 +13,7 @@
             "externalConsole": true,
             "internalConsoleOptions": "neverOpen",
             "MIMode": "gdb",
-            "miDebuggerPath": "F:\\MinGW64\\bin\\gdb.exe",
+            "miDebuggerPath": "gdb.exe",
             "preLaunchTask": "build"
         },
         {
@@ -27,7 +27,7 @@
             "environment": [],
             "externalConsole": true,
             "MIMode": "gdb",
-            "miDebuggerPath": "F:\\MinGW64\\bin\\gdb.exe",
+            "miDebuggerPath": "gdb.exe",
             "setupCommands": [
                 {
                     "description": "为 gdb 启用整齐打印",
