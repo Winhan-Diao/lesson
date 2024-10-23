@@ -80,6 +80,6 @@ int main() {
     std::cout << v6 << "\r\n";
     v5 << v6;
     std::cout << v5 << "\r\n";
-
+    system("pause");
     return 0;
 }
