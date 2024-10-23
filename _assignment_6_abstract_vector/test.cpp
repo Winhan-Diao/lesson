@@ -8,7 +8,7 @@ public:
     NoCpyMov(NoCpyMov&&) = delete;
 };
 
-int main() {
+void archived1() {
     char str[]{"qwert"};
     DebugVector<char, CAllocAllocator<char>> v(str, 4);
     std::cout << v << "\r\n";
@@ -73,13 +73,28 @@ int main() {
     DebugVector<std::size_t, CAllocAllocator<std::size_t>> test1;       //valid
     // DebugVector<std::string, CAllocAllocator<std::string>> test2;        //invalid
 
-    DebugVector<char> v5("Hello     ", 10);
+    DebugVector<char, CAllocAllocator<char>> v5("Hello     ", 10);
     v5.pushBack(' ');
     std::cout << v5 << "\r\n";
     DebugVector<char> v6("W", 1);
     std::cout << v6 << "\r\n";
+    // static_cast<AbstractVector<decltype(v5)::value_type, decltype(v5)::allocator_type>&>(v5) << v5;
     v5 << v6;
     std::cout << v5 << "\r\n";
+}
 
+int main() {
+    DebugVector<char, CAllocAllocator<char>> v;
+    v.pushBack('p');
+    v.pushBack('o');
+    v.pushBack('b');
+    std::cout << v << "\r\n";
+    v.clear();
+    std::cout << v << "\r\n";
+    v.pushBack('^');
+    v.pushBack('_');
+    v.pushBack('^');
+    std::cout << v << "\r\n";
+    // archived1();
     return 0;
 }

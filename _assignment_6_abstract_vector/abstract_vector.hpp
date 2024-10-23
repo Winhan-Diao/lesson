@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <memory>
 #include <type_traits>
+#include <cmath>
 #include "c_alloc_allocator.hpp"
 
 /*
@@ -48,10 +49,7 @@ protected:
         if (requestedExtra) {
             volume += requestedExtra;
         } else {
-            if (volume)
-                volume *= 1.5;
-            else
-                ++volume;
+            volume = 1.5 * volume + 1;
         }
         if constexpr (std::is_same_v<Alloc, CAllocAllocator<T>>) {
             std::cout << "[debug] CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
@@ -60,13 +58,19 @@ protected:
             T *neoData = a_t_t::allocate(alloc, volume);
             if (data)
                 std::move(data, data + size, neoData);
-            for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
-            a_t_t::deallocate(alloc, data, size);
+            deleteAll();
             data = neoData;
         }
     }
+    void deleteAll() noexcept {
+        if (data) {
+            for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
+            a_t_t::deallocate(alloc, data, size);
+            data = nullptr;
+        }
+    }
 public:
-    AbstractVector(): data(nullptr), size(0), volume(0) {}
+    AbstractVector(): alloc(), data(nullptr), size(0), volume(0) {}
     AbstractVector(T* const& data, size_t size): alloc(), data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
         if (data)
             std::copy(data, data + size, this->data);
@@ -81,8 +85,7 @@ public:
     }
     AbstractVector& operator= (const AbstractVector& v) {
         if (data == v.data) return *this;
-        for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
-        a_t_t::deallocate(alloc, data, volume);     // can improve, actually
+        deleteAll();
         data = a_t_t::allocate(alloc, v.volume);
         std::copy(v.cbegin(), v.cend(), begin());
         size = v.size;
@@ -91,8 +94,7 @@ public:
     }
     AbstractVector& operator= (AbstractVector&& v) {
         if (data == v.data) return *this;
-        for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
-        a_t_t::deallocate(alloc, data, volume);
+        deleteAll();
         data = v.data;
         size = v.size;
         volume = v.volume;
@@ -116,42 +118,53 @@ public:
     T& at(size_t index) {       // 变量实例的访问，有检查与异常
         return const_cast<T&>(const_cast<const AbstractVector&>(*this).at(index));
     }
-    virtual void pushBack(const T& element) {       // 往后追加，可以在string重写以适配'\0'
+    void pushBack(const T& element) {       // 往后追加，可以在string重写以适配'\0'
         if (size == volume) {
             expand();
         }
         data[size] = element;
         ++size;
     }
-    virtual void popBack() {
+    void popBack() {
         if (size > 0) {
             a_t_t::destroy(alloc, &data[size - 1]);
             --size;
         }
     }
+    void clear() {
+        deleteAll();
+        size = 0;
+        volume = 0;
+    }
     virtual AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) = 0;       // vector:数值加；string:追加
+    virtual std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const = 0;       // vector:数值加；string:追加
     virtual AbstractVector<T, Alloc>& operator<<(long long) = 0;       // vector:移位；string:追加数字
-    virtual AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, Alloc>& v) {     //string可以重写该函数实现'\0'的兼容
-        if (this->volume < (this->size + v.size)) {
-            this->expand(this->size + v.size - this->volume);
+    template<class _Alloc>
+    AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, _Alloc>& v) {
+        if (this->volume < (this->size + v.getSize())) {
+            this->expand(this->size + v.getSize() - this->volume);
         }
         std::copy(v.cbegin(), v.cend(), this->end());
-        this->size += v.size;
+        this->size += v.getSize();
         return *this;
     }
-    virtual AbstractVectorIterator<T> begin() { return AbstractVectorIterator<T>(&data[0]); }
-    virtual AbstractVectorIterator<const T> cbegin() const { return AbstractVectorIterator<const T>(&data[0]); }
-    virtual AbstractVectorIterator<T> end() { return AbstractVectorIterator<T>(&data[size]); }
-    virtual AbstractVectorIterator<const T> cend() const { return AbstractVectorIterator<const T>(&data[size]); }
-    virtual AbstractVectorReversedIterator<T> rbegin() { return AbstractVectorReversedIterator<T>(&data[size? size - 1: 0]); }
-    virtual AbstractVectorReversedIterator<const T> crbegin() const { return AbstractVectorReversedIterator<const T>(&data[size? size - 1: 0]); }
-    virtual AbstractVectorReversedIterator<T> rend() { return AbstractVectorReversedIterator<T>(size? data - 1: data); }
-    virtual AbstractVectorReversedIterator<const T> crend() const { return AbstractVectorReversedIterator<const T>(size? data - 1: data); }
+    AbstractVectorIterator<T> begin() { return AbstractVectorIterator<T>(&data[0]); }
+    AbstractVectorIterator<const T> cbegin() const { return AbstractVectorIterator<const T>(&data[0]); }
+    AbstractVectorIterator<T> end() { return AbstractVectorIterator<T>(&data[size]); }
+    AbstractVectorIterator<const T> cend() const { return AbstractVectorIterator<const T>(&data[size]); }
+    AbstractVectorReversedIterator<T> rbegin() { return AbstractVectorReversedIterator<T>(&data[size? size - 1: 0]); }
+    AbstractVectorReversedIterator<const T> crbegin() const { return AbstractVectorReversedIterator<const T>(&data[size? size - 1: 0]); }
+    AbstractVectorReversedIterator<T> rend() { return AbstractVectorReversedIterator<T>(size? data - 1: data); }
+    AbstractVectorReversedIterator<const T> crend() const { return AbstractVectorReversedIterator<const T>(size? data - 1: data); }
+
+    size_t getSize() const {
+        return size;
+    }
 
     virtual ~AbstractVector() noexcept {
-        for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
-        a_t_t::deallocate(alloc, data, size);
+        deleteAll();
     }
+
     friend int main();
     template <class _T, class _Alloc>
     friend std::ostream& operator<<(std::ostream&, const AbstractVector<_T, _Alloc>&);
@@ -162,9 +175,11 @@ class DebugVector: public AbstractVector<T, Alloc> {
 public:
     DebugVector() = default;
     DebugVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
+    DebugVector(const DebugVector& v): AbstractVector<T, Alloc>(v) {}
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) override { return *this; }       // vector:数值加；string:追加
+    std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const override { return std::make_unique<DebugVector<T, Alloc>>(*this); }       // vector:数值加；string:追加
     AbstractVector<T, Alloc>& operator<<(long long) override { return *this; }       // vector:移位；string:追加数字
-    AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, Alloc>& v) override { return AbstractVector<T, Alloc>::operator<<(v); }
+    using AbstractVector<T, Alloc>::operator<<;
 };
 
 template <class T>
