@@ -128,7 +128,7 @@ int main() {
 
     std::complex<double> *cs = new std::complex<double>[4]{std::complex<double>(.1, .2), std::complex<double>(.3, .4), std::complex<double>(.5, .6), std::complex<double>(-.1, -.2)};
     std::complex<double> *cs1 = new std::complex<double>[4]{std::complex<double>(1, 2), std::complex<double>(3, 4), std::complex<double>(5, 6), std::complex<double>(-1, -2)};
-    CollectionVector<std::complex<double>> v1(cs, 4);
+    CollectionVector<std::complex<double>, CAllocAllocator<std::complex<double>>> v1(cs, 4);
     std::cout << v1 << "\r\n";
 
     v1.insert(v1.begin() + 1, std::complex<double>(.98, .99));
@@ -141,9 +141,12 @@ int main() {
     v1.pushBack(std::move(std::complex<double>(3.4, 3.5)));
     std::cout << v1 << "\r\n";
 
-    CollectionVector<std::complex<double>> v2(cs1, 4);
+    CollectionVector<std::complex<double>, CAllocAllocator<std::complex<double>>> v2(cs1, 4);
     std::cout << v2 << "\r\n";
     v2 = v1;
+    std::cout << v2 << "\r\n";
+
+    v2.emplace(v2.begin() + 4, .01, .01);
     std::cout << v2 << "\r\n";
 
     return 0;

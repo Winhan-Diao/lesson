@@ -80,12 +80,12 @@ protected:
     }
     template <class... _Args>
     void construct(value_type *p, _Args&&... args) {
-        a_t_t::construct(alloc, p, std::forward<_Args...>(args...));
+        a_t_t::construct(alloc, p, std::forward<_Args>(args)...);
     }
     template <class... _Args>
     void reconstruct(value_type *p, _Args&&... args) {
         destroy(p);
-        construct(p, std::forward<_Args...>(args...));
+        construct(p, std::forward<_Args>(args)...);
     }
     template <class U>
     void assignThanReconstruct(value_type *original, U&& u) {
@@ -110,7 +110,10 @@ public:
             std::copy(data, data + size, this->data);
     }
     AbstractVector(const AbstractVector& v): alloc(v.alloc), data(a_t_t::allocate(alloc, v.volume)), size(v.size), volume(v.volume) {
-        for (size_t i = 0; i < size; ++i) assignThanConstruct(&data[i], v.data[i]);
+        if constexpr (std::is_trivially_copyable_v<value_type>)
+            std::memcpy(reinterpret_cast<void *>(data), reinterpret_cast<const void *>(v.data), sizeof(value_type) * v.size);
+        else
+            for (size_t i = 0; i < size; ++i) assignThanConstruct(&data[i], v.data[i]);
     }
     AbstractVector(AbstractVector&& v): alloc(std::move(v.alloc)), data(v.data), size(v.size), volume(v.volume) {
         v.data = nullptr;
@@ -126,7 +129,7 @@ public:
                 deleteAll();
                 data = a_t_t::allocate(alloc, v.size);
             }
-            if constexpr (std::is_trivially_copy_constructible_v<T>) {
+            if constexpr (std::is_trivially_copyable_v<T>) {
                 std::memcpy(reinterpret_cast<void *>(data), reinterpret_cast<const void *>(v.data), sizeof(value_type) * v.size);
             } else {
                 for (size_t i = 0; i < v.size; ++i) assignThanConstruct(&data[i], v.data[i]);   
@@ -134,7 +137,7 @@ public:
             size = v.size;
             volume = v.size;
         } else {
-            if constexpr (std::is_trivially_copy_constructible_v<T>) {
+            if constexpr (std::is_trivially_copyable_v<T>) {
                 std::memcpy(reinterpret_cast<void *>(data), reinterpret_cast<const void *>(v.data), sizeof(value_type) * v.size);
             } else {
                 for (size_t i = 0; i < std::min(v.size, size); ++i)
@@ -186,7 +189,7 @@ public:
         if (size == volume) {
             expand();
         }
-        construct(end().operator->(), std::forward<_Args...>(args...));
+        construct(end().operator->(), std::forward<_Args>(args)...);
         ++size;
     }
     template <class U, typename = std::enable_if_t<std::is_constructible_v<T, U>>>
@@ -194,7 +197,7 @@ public:
         // pos == end() starts a new logic for some tricky handling reasons
         if (pos == end()) {
             pushBack(std::forward<U>(element));
-            return pos;
+            return end();
         }
         if constexpr (!OPTIMIZE) {
             if (pos > end()) throw std::out_of_range{"range out of bound"};;
@@ -207,14 +210,10 @@ public:
         if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>) {
             std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + 1).operator->()));
         } else {
-            std::move_backward(pos, end(), end() + 1);
+            construct(end()->operator->(), std::move(end() - 1));
+            std::move_backward(pos, end() - 1, end());
         }
-        if constexpr (std::is_assignable_v<value_type, U>) {
-            *pos = std::forward<U>(element);
-        } else {
-            if constexpr (!std::is_trivially_destructible_v<value_type>) destroy(pos);
-            a_t_t::construct(alloc, pos.operator->(), std::forward<U>(element));
-        }
+        assignThanReconstruct(pos.operator->(), std::forward<U>(element));
         ++size;
         return AbstractVectorIterator<T>(pos);
     }
@@ -222,22 +221,24 @@ public:
     AbstractVectorIterator<T> emplace(AbstractVectorIterator<T> pos, _Args&&... args) {
         // pos == end() starts a new logic for some tricky handling reasons
         if (pos == end()) {
-            emplaceBack(std::forward<_Args...>(args...));
-            return pos;
+            emplaceBack(std::forward<_Args>(args)...);
+            return end();
         }
         if constexpr (!OPTIMIZE) {
             if (pos > end()) throw std::out_of_range{"range out of bound"};;
         }
         if (size == volume) {
+            std::ptrdiff_t distance = pos - begin();
             expand();
+            pos = begin() + distance;
         }
         if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>) {
             std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + 1).operator->()));
         } else {
-            std::move_backward(pos, end(), end() + 1);
+            construct(end()->operator->(), std::move(end() - 1));
+            std::move_backward(pos, end() - 1, end());
         }
-        destroy(pos);
-        a_t_t::construct(alloc, *pos, std::forward<_Args...>(args...));
+        reconstruct(pos.operator->(), std::forward<_Args>(args)...);
         ++size;
         return AbstractVectorIterator<T>(pos.operator->());
     }
@@ -258,7 +259,7 @@ public:
             if (last > end()) throw std::out_of_range{"iterator last exceeds end"};;
         }
         if (first < last) {
-            if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>)
+            if constexpr (std::is_trivially_copyable_v<value_type>)
                 std::memcpy(reinterpret_cast<void *>(first.operator->()), reinterpret_cast<void *>(last.operator->()), sizeof(value_type) * (end() - last));
             else 
                 std::move(last, end(), first);
@@ -273,7 +274,7 @@ public:
         }
         AbstractVectorIterator<T> nextPos = pos + 1;
         if (pos < end()) {
-            if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>)
+            if constexpr (std::is_trivially_copyable_v<value_type>)
                 std::memcpy(reinterpret_cast<void *>(pos.operator->()), reinterpret_cast<void *>(nextPos.operator->()), sizeof(value_type) * (end() - nextPos));
             else 
                 std::move(nextPos, end(), pos);
