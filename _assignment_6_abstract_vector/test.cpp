@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iterator>
+#include <complex>
 #include "abstract_vector.hpp"
 
 class NoCpyMov {
@@ -84,7 +85,7 @@ void archived1() {
     std::cout << v5 << "\r\n";
 }
 
-int main() {
+void archived2() {
     DebugVector<char, CAllocAllocator<char>> v;
     v.pushBack('p');
     v.pushBack('o');
@@ -108,13 +109,42 @@ int main() {
     v.pushBack('o');
     std::cout << v << "\r\n";
 
-    DebugVector<char> v1("This is a test about erase @^@", 30);
+    DebugVector<char, CAllocAllocator<char>> v1("This is a test about erase @^@", 30);
     auto iterF = v1.begin();
     std::advance(iterF, 7);
     auto iterE = v1.begin();
     std::advance(iterE, 20);
     v1.erase(iterF, iterE);
     std::cout << v1 << "\r\n";
-    // archived1();
+    v1.emplaceBack('!');
+    std::cout << v1 << "\r\n";
+    v1.insert(iterF, ',');
+    std::cout << v1 << "\r\n";
+}
+
+int main() {
+    CollectionVector<char> v("It's said that such way of creating string is not allowed, huh?", 63);
+    std::cout << v << "\r\n";
+
+    std::complex<double> *cs = new std::complex<double>[4]{std::complex<double>(.1, .2), std::complex<double>(.3, .4), std::complex<double>(.5, .6), std::complex<double>(-.1, -.2)};
+    std::complex<double> *cs1 = new std::complex<double>[4]{std::complex<double>(1, 2), std::complex<double>(3, 4), std::complex<double>(5, 6), std::complex<double>(-1, -2)};
+    CollectionVector<std::complex<double>> v1(cs, 4);
+    std::cout << v1 << "\r\n";
+
+    v1.insert(v1.begin() + 1, std::complex<double>(.98, .99));
+    std::cout << v1 << "\r\n";
+
+    v1.pushBack(std::move(std::complex<double>(3.2, 3.3)));
+    std::cout << v1 << "\r\n";
+    v1.pushBack(std::move(std::complex<double>(3.3, 3.4)));
+    std::cout << v1 << "\r\n";
+    v1.pushBack(std::move(std::complex<double>(3.4, 3.5)));
+    std::cout << v1 << "\r\n";
+
+    CollectionVector<std::complex<double>> v2(cs1, 4);
+    std::cout << v2 << "\r\n";
+    v2 = v1;
+    std::cout << v2 << "\r\n";
+
     return 0;
 }
