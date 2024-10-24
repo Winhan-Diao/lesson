@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <memory>
 #include <type_traits>
+#include <cmath>
 #include "c_alloc_allocator.hpp"
+#define OPTIMIZE false
 
 /*
 函数&方法：
@@ -48,31 +50,73 @@ protected:
         if (requestedExtra) {
             volume += requestedExtra;
         } else {
-            if (volume)
-                volume *= 1.5;
-            else
-                ++volume;
+            volume = 1.5 * volume + 1;
         }
-        if constexpr (std::is_same_v<Alloc, CAllocAllocator<T>>) {
+        if constexpr (std::is_same_v<allocator_type, CAllocAllocator<T>>) {
             std::cout << "[debug] CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
             alloc.reallocate(data, volume);
         } else {
             T *neoData = a_t_t::allocate(alloc, volume);
             if (data)
                 std::move(data, data + size, neoData);
-            for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
-            a_t_t::deallocate(alloc, data, size);
+            deleteAll();
             data = neoData;
         }
     }
+    void deleteAll() noexcept {
+        if (data) {
+            if constexpr (!std::is_trivially_destructible_v<value_type>)
+                for (size_t i = 0; i < size; ++i) destroy(&data[i]);
+            a_t_t::deallocate(alloc, data, size);
+            data = nullptr;
+        }
+    }
+    void destroy(value_type *p) noexcept {
+        if constexpr (!std::is_trivially_destructible_v<value_type>) a_t_t::destroy(alloc, p); 
+    }
+    template <class _Iterator>
+    void destroy(const _Iterator& iter) noexcept {
+        if constexpr (!std::is_trivially_destructible_v<value_type>) a_t_t::destroy(alloc, iter.operator->()); 
+    }
+    template <class... _Args>
+    void construct(value_type *p, _Args&&... args) {
+        a_t_t::construct(alloc, p, std::forward<_Args>(args)...);
+    }
+    template <class... _Args>
+    void reconstruct(value_type *p, _Args&&... args) {
+        destroy(p);
+        construct(p, std::forward<_Args>(args)...);
+    }
+    template <class U>
+    void assignThanReconstruct(value_type *original, U&& u) {
+        if constexpr (std::is_assignable_v<value_type, U>) {
+            *original = std::forward<U>(u);
+        } else {
+            reconstruct(original, std::forward<U>(u));
+        }
+    }
+    template <class U>
+    void assignThanConstruct(value_type *p, U&& u) {
+        if constexpr (std::is_assignable_v<value_type, U>) {
+            *p = std::forward<U>(u);
+        } else {
+            construct(p, std::forward<U>(u));
+        }
+    }
 public:
-    AbstractVector(): data(nullptr), size(0), volume(0) {}
+    AbstractVector(): alloc(), data(nullptr), size(0), volume(0) {}
     AbstractVector(T* const& data, size_t size): alloc(), data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
         if (data)
             std::copy(data, data + size, this->data);
     }
-    AbstractVector(const AbstractVector& v): alloc(v.alloc), data(a_t_t::allocate(alloc, v.volume)), size(v.size), volume(v.volume) {
-        for (size_t i = 0; i < size; ++i) a_t_t::construct(alloc, &data[i], v.data[i]);
+    AbstractVector(const AbstractVector& v, size_t i): alloc(v.alloc), data(a_t_t::allocate(alloc, std::max(i, v.volume))), size(v.size), volume(std::max(i, v.volume)) {
+        if constexpr (std::is_trivially_copyable_v<value_type>)
+            std::memcpy(reinterpret_cast<void *>(data), reinterpret_cast<const void *>(v.data), sizeof(value_type) * v.size);
+        else
+            for (size_t i = 0; i < size; ++i) assignThanConstruct(&data[i], v.data[i]);
+    }
+    AbstractVector(const AbstractVector& v): AbstractVector(v, 0) {
+        std::cout << "[debug] Copy Constructor Called" << "\r\n";       //debug
     }
     AbstractVector(AbstractVector&& v): alloc(std::move(v.alloc)), data(v.data), size(v.size), volume(v.volume) {
         v.data = nullptr;
@@ -81,18 +125,37 @@ public:
     }
     AbstractVector& operator= (const AbstractVector& v) {
         if (data == v.data) return *this;
-        for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
-        a_t_t::deallocate(alloc, data, volume);     // can improve, actually
-        data = a_t_t::allocate(alloc, v.volume);
-        std::copy(v.cbegin(), v.cend(), begin());
-        size = v.size;
-        volume = v.volume;
+        if (v.size > volume) {
+            if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>) {
+                alloc.reallocate(data, v.size);
+            } else {
+                deleteAll();
+                data = a_t_t::allocate(alloc, v.size);
+            }
+            if constexpr (std::is_trivially_copyable_v<T>) {
+                std::memcpy(reinterpret_cast<void *>(data), reinterpret_cast<const void *>(v.data), sizeof(value_type) * v.size);
+            } else {
+                for (size_t i = 0; i < v.size; ++i) assignThanConstruct(&data[i], v.data[i]);   
+            }
+            size = v.size;
+            volume = v.size;
+        } else {
+            if constexpr (std::is_trivially_copyable_v<T>) {
+                std::memcpy(reinterpret_cast<void *>(data), reinterpret_cast<const void *>(v.data), sizeof(value_type) * v.size);
+            } else {
+                for (size_t i = 0; i < std::min(v.size, size); ++i)
+                    assignThanReconstruct(&data[i], v.data[i]);
+                if (size < v.size)
+                    for (size_t i = size; i < v.size; ++i)
+                        assignThanConstruct(&data[i], v.data[i]);
+            }
+            size = v.size;
+        }
         return *this;
     }
     AbstractVector& operator= (AbstractVector&& v) {
         if (data == v.data) return *this;
-        for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
-        a_t_t::deallocate(alloc, data, volume);
+        deleteAll();
         data = v.data;
         size = v.size;
         volume = v.volume;
@@ -116,42 +179,143 @@ public:
     T& at(size_t index) {       // 变量实例的访问，有检查与异常
         return const_cast<T&>(const_cast<const AbstractVector&>(*this).at(index));
     }
-    virtual void pushBack(const T& element) {       // 往后追加，可以在string重写以适配'\0'
+    template <class U, typename = std::enable_if_t<std::is_constructible_v<T, U>>>
+    void pushBack(U&& element) {
         if (size == volume) {
             expand();
         }
-        data[size] = element;
+        assignThanConstruct(end().operator->(), std::forward<U>(element));
         ++size;
     }
-    virtual void popBack() {
+    template <class... _Args, typename = std::enable_if_t<std::is_constructible_v<T, _Args...>>>
+    void emplaceBack(_Args&&... args) {
+        if (size == volume) {
+            expand();
+        }
+        construct(end().operator->(), std::forward<_Args>(args)...);
+        ++size;
+    }
+    template <class U, typename = std::enable_if_t<std::is_constructible_v<T, U>>>
+    AbstractVectorIterator<T> insert(AbstractVectorIterator<T> pos, U&& element) {
+        // pos == end() starts a new logic for some tricky handling reasons
+        if (pos == end()) {
+            pushBack(std::forward<U>(element));
+            return end();
+        }
+        if constexpr (!OPTIMIZE) {
+            if (pos > end()) throw std::out_of_range{"range out of bound"};;
+        }
+        if (size == volume) {
+            std::ptrdiff_t distance = pos - begin();
+            expand();
+            pos = begin() + distance;
+        }
+        if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>) {
+            std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + 1).operator->()));
+        } else {
+            construct(end().operator->(), std::move(*(end() - 1)));
+            std::move_backward(pos, end() - 1, end());
+        }
+        assignThanReconstruct(pos.operator->(), std::forward<U>(element));
+        ++size;
+        return AbstractVectorIterator<T>(pos);
+    }
+    template <class... _Args, typename = std::enable_if_t<std::is_constructible_v<T, _Args...>>>
+    AbstractVectorIterator<T> emplace(AbstractVectorIterator<T> pos, _Args&&... args) {
+        // pos == end() starts a new logic for some tricky handling reasons
+        if (pos == end()) {
+            emplaceBack(std::forward<_Args>(args)...);
+            return end();
+        }
+        if constexpr (!OPTIMIZE) {
+            if (pos > end()) throw std::out_of_range{"range out of bound"};;
+        }
+        if (size == volume) {
+            std::ptrdiff_t distance = pos - begin();
+            expand();
+            pos = begin() + distance;
+        }
+        if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>) {
+            std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + 1).operator->()));
+        } else {
+            construct(end().operator->(), std::move(*(end() - 1)));
+            std::move_backward(pos, end() - 1, end());
+        }
+        reconstruct(pos.operator->(), std::forward<_Args>(args)...);
+        ++size;
+        return AbstractVectorIterator<T>(pos.operator->());
+    }
+
+    void popBack() {
         if (size > 0) {
-            a_t_t::destroy(alloc, &data[size - 1]);
+            destroy(&data[size - 1]);
             --size;
         }
     }
+    void clear() {
+        deleteAll();
+        size = 0;
+        volume = 0;
+    }
+    AbstractVectorIterator<T> erase(const AbstractVectorIterator<T>& first, const AbstractVectorIterator<T>& last) {      // passing last exceeding end() is invalidated
+        if constexpr (!OPTIMIZE) {
+            if (last > end()) throw std::out_of_range{"iterator last exceeds end"};;
+        }
+        if (first < last) {
+            if constexpr (std::is_trivially_copyable_v<value_type>)
+                std::memcpy(reinterpret_cast<void *>(first.operator->()), reinterpret_cast<void *>(last.operator->()), sizeof(value_type) * (end() - last));
+            else 
+                std::move(last, end(), first);
+            for (size_t i = size - (last - first); i < size; ++i) destroy(&data[size - 1]);
+            size -= last - first;
+        }
+        return first;
+    }
+    AbstractVectorIterator<T> erase(const AbstractVectorIterator<T>& pos) {        // passing end() as pos is invalidated, which is the same policy as the std::vector
+        if constexpr (!OPTIMIZE) {
+            if (pos >= end()) throw std::out_of_range{"pos exceeds the last element address"};;
+        }
+        AbstractVectorIterator<T> nextPos = pos + 1;
+        if (pos < end()) {
+            if constexpr (std::is_trivially_copyable_v<value_type>)
+                std::memcpy(reinterpret_cast<void *>(pos.operator->()), reinterpret_cast<void *>(nextPos.operator->()), sizeof(value_type) * (end() - nextPos));
+            else 
+                std::move(nextPos, end(), pos);
+            destroy(&data[size - 1]);
+            --size;
+        }
+        return pos;
+    }
+
     virtual AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) = 0;       // vector:数值加；string:追加
-    virtual AbstractVector<T, Alloc>& operator<<(long long) = 0;       // vector:移位；string:追加数字
-    virtual AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, Alloc>& v) {     //string可以重写该函数实现'\0'的兼容
-        if (this->volume < (this->size + v.size)) {
-            this->expand(this->size + v.size - this->volume);
+    virtual std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const = 0;       // vector:数值加；string:追加
+    [[deprecated]]virtual AbstractVector<T, Alloc>& operator<<(long long) = 0;       // The idea is so stupid that now it's deprecated
+    template<class _Alloc>
+    AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, _Alloc>& v) {
+        if (this->volume < (this->size + v.getSize())) {
+            this->expand(this->size + v.getSize() - this->volume);
         }
         std::copy(v.cbegin(), v.cend(), this->end());
-        this->size += v.size;
+        this->size += v.getSize();
         return *this;
     }
-    virtual AbstractVectorIterator<T> begin() { return AbstractVectorIterator<T>(&data[0]); }
-    virtual AbstractVectorIterator<const T> cbegin() const { return AbstractVectorIterator<const T>(&data[0]); }
-    virtual AbstractVectorIterator<T> end() { return AbstractVectorIterator<T>(&data[size]); }
-    virtual AbstractVectorIterator<const T> cend() const { return AbstractVectorIterator<const T>(&data[size]); }
-    virtual AbstractVectorReversedIterator<T> rbegin() { return AbstractVectorReversedIterator<T>(&data[size? size - 1: 0]); }
-    virtual AbstractVectorReversedIterator<const T> crbegin() const { return AbstractVectorReversedIterator<const T>(&data[size? size - 1: 0]); }
-    virtual AbstractVectorReversedIterator<T> rend() { return AbstractVectorReversedIterator<T>(size? data - 1: data); }
-    virtual AbstractVectorReversedIterator<const T> crend() const { return AbstractVectorReversedIterator<const T>(size? data - 1: data); }
+    AbstractVectorIterator<T> begin() { return AbstractVectorIterator<T>(&data[0]); }
+    AbstractVectorIterator<const T> cbegin() const { return AbstractVectorIterator<const T>(&data[0]); }
+    AbstractVectorIterator<T> end() { return AbstractVectorIterator<T>(&data[size]); }
+    AbstractVectorIterator<const T> cend() const { return AbstractVectorIterator<const T>(&data[size]); }
+    AbstractVectorReversedIterator<T> rbegin() { return AbstractVectorReversedIterator<T>(&data[size? size - 1: 0]); }
+    AbstractVectorReversedIterator<const T> crbegin() const { return AbstractVectorReversedIterator<const T>(&data[size? size - 1: 0]); }
+    AbstractVectorReversedIterator<T> rend() { return AbstractVectorReversedIterator<T>(size? data - 1: data); }
+    AbstractVectorReversedIterator<const T> crend() const { return AbstractVectorReversedIterator<const T>(size? data - 1: data); }
+
+    size_t getSize() const {
+        return size;
+    }
 
     virtual ~AbstractVector() noexcept {
-        for (size_t i = 0; i < size; ++i) a_t_t::destroy(alloc, &data[i]);
-        a_t_t::deallocate(alloc, data, size);
+        deleteAll();
     }
+
     friend int main();
     template <class _T, class _Alloc>
     friend std::ostream& operator<<(std::ostream&, const AbstractVector<_T, _Alloc>&);
@@ -160,11 +324,32 @@ public:
 template <class T, class Alloc = std::allocator<T>>
 class DebugVector: public AbstractVector<T, Alloc> {
 public:
+    using AbstractVector<T, Alloc>::operator<<;
     DebugVector() = default;
     DebugVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
+    DebugVector(const DebugVector& v): AbstractVector<T, Alloc>(v) {}
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) override { return *this; }       // vector:数值加；string:追加
-    AbstractVector<T, Alloc>& operator<<(long long) override { return *this; }       // vector:移位；string:追加数字
-    AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, Alloc>& v) override { return AbstractVector<T, Alloc>::operator<<(v); }
+    std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const override { return std::make_unique<DebugVector<T, Alloc>>(*this); }       // vector:数值加；string:追加
+    [[deprecated]]AbstractVector<T, Alloc>& operator<<(long long) override { return *this; }
+};
+
+template <class T, class Alloc = std::allocator<T>>
+class CollectionVector: public AbstractVector<T, Alloc> {
+public:
+    using AbstractVector<T, Alloc>::operator<<;
+    CollectionVector() = default;
+    CollectionVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
+    CollectionVector(const CollectionVector& v): CollectionVector(v, 0) {}
+    CollectionVector(const CollectionVector& v, size_t i): AbstractVector<T, Alloc>(v, i) {}
+    AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& v) override { 
+        return *this << v;
+    }
+    std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>& v) const override { 
+        auto neoVector = std::make_unique<CollectionVector<T, Alloc>>(*this);
+
+        throw std::runtime_error{"Not supported for CollectionVector"};
+    }
+    [[deprecated]]AbstractVector<T, Alloc>& operator<<(long long) override { throw std::runtime_error{"Not supported for CollectionVector"}; }
 };
 
 template <class T>
@@ -179,8 +364,8 @@ protected:
     T *ptr;
 public:
     AbstractVectorIterator(T *ptr): ptr(ptr) {};
-    T& operator*() { return *ptr; }
-    T* operator->() { return ptr; }
+    T& operator*() const { return *ptr; }
+    T* operator->() const { return ptr; }
     AbstractVectorIterator& operator++() {
         ++ptr;
         return *this;
@@ -198,6 +383,14 @@ public:
         auto tmp = *this;
         --ptr;
         return tmp;
+    }
+    AbstractVectorIterator& operator+= (ssize_t n) {
+        ptr += n;
+        return *this;
+    }
+    AbstractVectorIterator& operator-= (ssize_t n) {
+        ptr -= n;
+        return *this;
     }
     AbstractVectorIterator operator+(std::ptrdiff_t n) const { return AbstractVectorIterator(ptr + n); }
     AbstractVectorIterator operator-(std::ptrdiff_t n) const { return AbstractVectorIterator(ptr - n); }
@@ -232,6 +425,14 @@ public:
         auto tmp = *this;
         --this->ptr;
         return tmp;
+    }
+    AbstractVectorReversedIterator& operator+= (ssize_t n) {
+        this->ptr -= n;
+        return *this;
+    }
+    AbstractVectorReversedIterator& operator-= (ssize_t n) {
+        this->ptr += n;
+        return *this;
     }
     std::ptrdiff_t operator-(const AbstractVectorReversedIterator& i) const { return std::ptrdiff_t(i.ptr - this->ptr); }
     AbstractVectorReversedIterator operator-(std::ptrdiff_t n) const { return AbstractVectorReversedIterator(this->ptr + n); }

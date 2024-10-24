@@ -19,12 +19,6 @@ public:
         std::free(p);
     }
     void reallocate(T *& p, std::size_t newSize) {
-        //if (newSize == 0) {
-        //    // 如果新大小为 0，则直接释放内存
-        //    deallocate(p,newSize);
-        //    p = nullptr; // 将指针置为 nullptr，避免悬空指针
-        //    return;
-        //}
         p = reinterpret_cast<T *>(std::realloc(p, sizeof(T) * newSize));
     }
 };
