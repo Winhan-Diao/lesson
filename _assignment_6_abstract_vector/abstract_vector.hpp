@@ -89,7 +89,7 @@ protected:
     }
     template <class U>
     void assignThanReconstruct(value_type *original, U&& u) {
-        if constexpr (std::is_trivially_assignable_v<value_type, U> || std::is_assignable_v<value_type, U>) {      // may redundant
+        if constexpr (std::is_assignable_v<value_type, U>) {
             *original = std::forward<U>(u);
         } else {
             reconstruct(original, std::forward<U>(u));
@@ -97,7 +97,7 @@ protected:
     }
     template <class U>
     void assignThanConstruct(value_type *p, U&& u) {
-        if constexpr (std::is_trivially_assignable_v<value_type, U> || std::is_assignable_v<value_type, U>) {      // may redundant
+        if constexpr (std::is_assignable_v<value_type, U>) {
             *p = std::forward<U>(u);
         } else {
             construct(p, std::forward<U>(u));
@@ -213,7 +213,7 @@ public:
         if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>) {
             std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + 1).operator->()));
         } else {
-            construct(end()->operator->(), std::move(end() - 1));
+            construct(end().operator->(), std::move(*(end() - 1)));
             std::move_backward(pos, end() - 1, end());
         }
         assignThanReconstruct(pos.operator->(), std::forward<U>(element));
@@ -238,7 +238,7 @@ public:
         if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>) {
             std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + 1).operator->()));
         } else {
-            construct(end()->operator->(), std::move(end() - 1));
+            construct(end().operator->(), std::move(*(end() - 1)));
             std::move_backward(pos, end() - 1, end());
         }
         reconstruct(pos.operator->(), std::forward<_Args>(args)...);
@@ -346,6 +346,7 @@ public:
     }
     std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>& v) const override { 
         auto neoVector = std::make_unique<CollectionVector<T, Alloc>>(*this);
+
         throw std::runtime_error{"Not supported for CollectionVector"};
     }
     [[deprecated]]AbstractVector<T, Alloc>& operator<<(long long) override { throw std::runtime_error{"Not supported for CollectionVector"}; }
