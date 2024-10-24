@@ -109,11 +109,14 @@ public:
         if (data)
             std::copy(data, data + size, this->data);
     }
-    AbstractVector(const AbstractVector& v): alloc(v.alloc), data(a_t_t::allocate(alloc, v.volume)), size(v.size), volume(v.volume) {
+    AbstractVector(const AbstractVector& v, size_t i): alloc(v.alloc), data(a_t_t::allocate(alloc, std::max(i, v.volume))), size(v.size), volume(std::max(i, v.volume)) {
         if constexpr (std::is_trivially_copyable_v<value_type>)
             std::memcpy(reinterpret_cast<void *>(data), reinterpret_cast<const void *>(v.data), sizeof(value_type) * v.size);
         else
             for (size_t i = 0; i < size; ++i) assignThanConstruct(&data[i], v.data[i]);
+    }
+    AbstractVector(const AbstractVector& v): AbstractVector(v, 0) {
+        std::cout << "[debug] Copy Constructor Called" << "\r\n";       //debug
     }
     AbstractVector(AbstractVector&& v): alloc(std::move(v.alloc)), data(v.data), size(v.size), volume(v.volume) {
         v.data = nullptr;
@@ -336,13 +339,13 @@ public:
     using AbstractVector<T, Alloc>::operator<<;
     CollectionVector() = default;
     CollectionVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
-    CollectionVector(const CollectionVector& v): AbstractVector<T, Alloc>(v) {}
+    CollectionVector(const CollectionVector& v): CollectionVector(v, 0) {}
+    CollectionVector(const CollectionVector& v, size_t i): AbstractVector<T, Alloc>(v, i) {}
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& v) override { 
         return *this << v;
     }
     std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>& v) const override { 
         auto neoVector = std::make_unique<CollectionVector<T, Alloc>>(*this);
-
         throw std::runtime_error{"Not supported for CollectionVector"};
     }
     [[deprecated]]AbstractVector<T, Alloc>& operator<<(long long) override { throw std::runtime_error{"Not supported for CollectionVector"}; }
