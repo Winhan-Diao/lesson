@@ -58,7 +58,8 @@ protected:
         } else {
             T *neoData = a_t_t::allocate(alloc, volume);
             if (data)
-                std::move(data, data + size, neoData);
+                for (size_t i = 0; i < size; ++i)
+                    assignThanConstruct<value_type&&, std::is_trivially_copyable_v<value_type>>(&neoData[i], std::move(data[i]));
             deleteAll();
             data = neoData;
         }
@@ -87,17 +88,17 @@ protected:
         destroy(p);
         construct(p, std::forward<_Args>(args)...);
     }
-    template <class U>
+    template <class U, bool _Cond = std::is_assignable_v<value_type, U>>
     void assignThanReconstruct(value_type *original, U&& u) {
-        if constexpr (std::is_assignable_v<value_type, U>) {
+        if constexpr (_Cond) {
             *original = std::forward<U>(u);
         } else {
             reconstruct(original, std::forward<U>(u));
         }
     }
-    template <class U>
+    template <class U, bool _Cond = std::is_assignable_v<value_type, U>>
     void assignThanConstruct(value_type *p, U&& u) {
-        if constexpr (std::is_assignable_v<value_type, U>) {
+        if constexpr (_Cond) {
             *p = std::forward<U>(u);
         } else {
             construct(p, std::forward<U>(u));
@@ -107,7 +108,7 @@ public:
     AbstractVector(): alloc(), data(nullptr), size(0), volume(0) {}
     AbstractVector(T* const& data, size_t size): alloc(), data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
         if (data)
-            std::copy(data, data + size, this->data);
+            std::copy(data, data + size, this->data);       //flaky
     }
     AbstractVector(const AbstractVector& v, size_t i): alloc(v.alloc), data(a_t_t::allocate(alloc, std::max(i, v.volume))), size(v.size), volume(std::max(i, v.volume)) {
         if constexpr (std::is_trivially_copyable_v<value_type>)
@@ -122,6 +123,10 @@ public:
         v.data = nullptr;
         v.size = 0;
         v.volume = 0;
+    }
+    AbstractVector(std::initializer_list<T> l): data(a_t_t::allocate(alloc, l.size())), size(l.size()), volume(l.size()) {
+        for (size_t i = 0; i < size; ++i)
+            assignThanConstruct<const value_type&, std::is_trivially_copyable_v<value_type>>(&data[i], l.begin()[i]);
     }
     AbstractVector& operator= (const AbstractVector& v) {
         if (data == v.data) return *this;
@@ -184,7 +189,7 @@ public:
         if (size == volume) {
             expand();
         }
-        assignThanConstruct(end().operator->(), std::forward<U>(element));
+        assignThanConstruct<decltype(std::forward<U>(element)), std::is_trivially_copyable_v<value_type>>(end().operator->(), std::forward<U>(element));
         ++size;
     }
     template <class... _Args, typename = std::enable_if_t<std::is_constructible_v<T, _Args...>>>
@@ -341,6 +346,7 @@ public:
     CollectionVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
     CollectionVector(const CollectionVector& v): CollectionVector(v, 0) {}
     CollectionVector(const CollectionVector& v, size_t i): AbstractVector<T, Alloc>(v, i) {}
+    CollectionVector(std::initializer_list<T> l): AbstractVector<T, Alloc>(l) {}
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& v) override { 
         return *this << v;
     }
