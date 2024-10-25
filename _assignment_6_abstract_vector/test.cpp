@@ -205,6 +205,15 @@ int main() {
     std::string t1 = "std::string"s;
     sv1.insert(sv1.begin() + 3, t1.cbegin(), t1.cend());
     std::cout << sv1 << "\r\n";
+    auto sv3 = "my custom string literal, haha!"_sv;
+    std::cout << sv3 << "\r\n";
+    sv3.insert(2, ", hehehe,");
+    std::cout << sv3 << "\r\n";
+    std::cout << sv3.substr(4) << "\r\n";
+    std::cout << sv3.getData() << "\r\n";
+    auto uArr = sv3.c_str();
+    std::cout << uArr.get() << "\r\n";
+    std::cout << sv3 << "\r\n";
     return 0;
 }
 
