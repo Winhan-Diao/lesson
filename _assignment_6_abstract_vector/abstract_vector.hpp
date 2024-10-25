@@ -141,7 +141,7 @@ public:
             if constexpr (std::is_trivially_copyable_v<T>) {
                 std::memcpy(reinterpret_cast<void *>(data), reinterpret_cast<const void *>(v.data), sizeof(value_type) * v.size);
             } else {
-                for (size_t i = 0; i < v.size; ++i) assignThanConstruct(&data[i], v.data[i]);   
+                for (size_t i = 0; i < v.size; ++i) assignThanConstruct<decltype(v.data[i]), std::is_trivially_copyable_v<T>>(&data[i], v.data[i]);   
             }
             size = v.size;
             volume = v.size;
@@ -216,7 +216,7 @@ public:
             expand();
             pos = begin() + distance;
         }
-        if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>) {
+        if constexpr (std::is_trivially_copyable_v<value_type>) {
             std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + 1).operator->()));
         } else {
             construct(end().operator->(), std::move(*(end() - 1)));
@@ -225,6 +225,46 @@ public:
         assignThanReconstruct(pos.operator->(), std::forward<U>(element));
         ++size;
         return AbstractVectorIterator<T>(pos);
+    }
+    template <class _InputIter>
+    AbstractVectorIterator<T> insert(AbstractVectorIterator<T> pos, _InputIter first, _InputIter last) {
+        size_t inputSize = last - first;
+        if constexpr (!OPTIMIZE) {
+            if (first > last) throw std::runtime_error{"invalid input of first and last"};
+            if (pos > end()) throw std::out_of_range{"iterator pos exceeds end"};
+        }
+        if (!inputSize) return pos;
+        if (size + inputSize > volume) {
+            std::ptrdiff_t distance = pos - begin();
+            size_t halfVolume = size * .5 + 1;
+            size_t expandTimes = inputSize / halfVolume + 1;
+            expand(expandTimes * halfVolume);
+            pos = begin() + distance;
+        }
+        if constexpr (std::is_trivially_copyable_v<value_type>) {
+            std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + inputSize).operator->()));
+            std::copy(first, last, pos);        // std::copy may boil down to memmove, which is good
+        } else {
+            std::ptrdiff_t toShift = end() - pos;
+            std::ptrdiff_t toMoveConstruct = inputSize > toShift? toShift: inputSize;
+            std::ptrdiff_t toMoveAssign = inputSize >= toShift? 0: toShift - inputSize;
+            std::ptrdiff_t toConstruct = inputSize > toShift? inputSize - toShift: 0;
+            std::ptrdiff_t toAssign = toMoveConstruct;
+            for (size_t i = 0; i < toMoveConstruct; ++i)
+                construct((end() - 1 + inputSize - i).operator->(), std::move(*(end() - 1 - i)));
+            // for (size_t i = 0; i < toMoveAssign; ++i)
+            if (toMoveAssign)
+                std::move_backward(pos, pos + toMoveAssign, end());
+            // if (toConstruct)
+            for (size_t i = 0; i < toConstruct; ++i)
+                construct((end() - 1 + toConstruct - i).operator->(), *(last - 1 - i));
+            if (toAssign)
+                std::copy(first, first + toAssign, pos);
+            // std::move_backward(pos, end() - inputSize, end());
+        }
+        // std::copy(first, last, pos);
+        size += inputSize;
+        return pos;
     }
     template <class... _Args, typename = std::enable_if_t<std::is_constructible_v<T, _Args...>>>
     AbstractVectorIterator<T> emplace(AbstractVectorIterator<T> pos, _Args&&... args) {
@@ -241,7 +281,7 @@ public:
             expand();
             pos = begin() + distance;
         }
-        if constexpr (std::is_same_v<allocator_type, CAllocAllocator<value_type>>) {
+        if constexpr (std::is_trivially_copyable_v<value_type>) {
             std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + 1).operator->()));
         } else {
             construct(end().operator->(), std::move(*(end() - 1)));
