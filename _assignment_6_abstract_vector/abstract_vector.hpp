@@ -387,7 +387,10 @@ public:
     CollectionVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
     CollectionVector(const CollectionVector& v): CollectionVector(v, 0) {}
     CollectionVector(const CollectionVector& v, size_t i): AbstractVector<T, Alloc>(v, i) {}
+    CollectionVector(CollectionVector&& v): AbstractVector<T, Alloc>(std::move(v)) {}
     CollectionVector(std::initializer_list<T> l): AbstractVector<T, Alloc>(l) {}
+    CollectionVector& operator=(const CollectionVector& v) { return reinterpret_cast<CollectionVector&>(AbstractVector<T, Alloc>::operator=(v)); }
+    CollectionVector& operator=(CollectionVector&& v) { return reinterpret_cast<CollectionVector&>(AbstractVector<T, Alloc>::operator=(std::move(v))); }
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& v) override { 
         return *this << v;
     }
