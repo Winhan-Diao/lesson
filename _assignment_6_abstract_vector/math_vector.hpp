@@ -1,17 +1,15 @@
+#pragma once
 #include"abstract_vector.hpp"
 //数学向量类，限定平凡类传入T
 template <class T, class Alloc = std::allocator<T>, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 class MathVector:public AbstractVector<T,Alloc>{
-protected:
-	void expand(size_t requestedExtra = 0) ;//直接继承
 public:
 	MathVector():AbstractVector<T,Alloc>(){};
 	MathVector(size_t n):AbstractVector<T,Alloc>(){
-		// expand(n);
-		volume=n;
-		size=n;
-		data=alloc.allocate(n);
-		memset(data,0,n*sizeof(T));
+		this->expand(n);
+		this->size=n;
+		this->data=this->alloc.allocate(n);
+		memset(this->data,0,n*sizeof(T));
 	}
 	MathVector(const MathVector& c):AbstractVector<T,Alloc>(c){}
 
@@ -34,5 +32,6 @@ public:
 		}
 		return std::make_unique<MathVector<T, Alloc>>(std::move(res));
 	}   
-
+	[[deprecated]]AbstractVector<T, Alloc>& operator<<(long long) override { throw std::runtime_error{"Not supported for CollectionVector"}; }
+	
 };
