@@ -3,6 +3,8 @@
 #include <complex>
 #include "abstract_vector.hpp"
 
+using namespace std::literals;
+
 class NoCpyMov {
 public:
     NoCpyMov() = default;
@@ -122,7 +124,7 @@ void archived2() {
     std::cout << v1 << "\r\n";
 }
 
-int main() {
+void archived3() {
     CollectionVector<char> v("It's said that such way of creating string is not allowed, huh?", 63);
     std::cout << v << "\r\n";
 
@@ -149,5 +151,26 @@ int main() {
     v2.emplace(v2.begin() + 4, .01, .01);
     std::cout << v2 << "\r\n";
 
+    CollectionVector<std::complex<double>, CAllocAllocator<std::complex<double>>> v3(v2, size_t(100));
+    std::cout << v3 << "\r\n";
+
+}
+
+int main() {
+    CollectionVector<std::string> v1{"Hello"s, "World"s, "This"s, "is"s, "Collection"s, "Vector"s, "Called"s, "v1"s};
+    std::cout << v1 << "\r\n";
+    v1.pushBack("Yes");
+    std::cout << v1 << "\r\n";
+    v1.emplace(v1.begin() + 2, "emplaced!"s);
+    v1.emplaceBack("emplaced back!"s);
+    std::cout << v1 << "\r\n";
+    v1.erase(v1.begin() + 3, v1.begin() + 7);
+    std::cout << v1 << "\r\n";
+    v1.insert(v1.end() - 1, "no!"s);
+    std::cout << v1 << "\r\n";
+    v1.insert(v1.end() - 2, "no no no"s);
+    std::cout << v1 << "\r\n";
+
+    CollectionVector<size_t, CAllocAllocator<size_t>> v2 = {1, 23, 345, 4567, 56789, 0};
     return 0;
 }
