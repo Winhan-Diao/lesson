@@ -129,6 +129,18 @@ public:
         for (size_t i = 0; i < size; ++i)
             assignThanConstruct<const value_type&, std::is_trivially_copyable_v<value_type>>(&data[i], l.begin()[i]);
     }
+    AbstractVector(ssize_t size, const T& t): data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
+        if constexpr (std::is_trivially_copyable_v<T>)
+            std::fill(data, data + size, t);
+        else
+            for (size_t i = 0; i < size; ++i)
+                construct(data + i, t);
+    }
+    AbstractVector(ssize_t size): data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
+        if constexpr (!std::is_trivially_copyable_v<T>)
+            for (size_t i = 0; i < size; ++i)
+                construct(data + i);
+    }
     AbstractVector& operator= (const AbstractVector& v) {
         if (data == v.data) return *this;
         if (v.size > volume) {
@@ -291,7 +303,6 @@ public:
         ++size;
         return AbstractVectorIterator<T>(pos.operator->());
     }
-
     void popBack() {
         if (size > 0) {
             destroy(&data[size - 1]);
@@ -385,12 +396,14 @@ public:
     using AbstractVector<T, Alloc>::operator<<;
     CollectionVector() = default;
     CollectionVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
-    CollectionVector(const CollectionVector& v): CollectionVector(v, 0) {}
+    // CollectionVector(const CollectionVector& v): CollectionVector(v, 0) {}
     CollectionVector(const CollectionVector& v, size_t i): AbstractVector<T, Alloc>(v, i) {}
-    CollectionVector(CollectionVector&& v): AbstractVector<T, Alloc>(std::move(v)) {}
+    // CollectionVector(CollectionVector&& v): AbstractVector<T, Alloc>(std::move(v)) {}
     CollectionVector(std::initializer_list<T> l): AbstractVector<T, Alloc>(l) {}
-    CollectionVector& operator=(const CollectionVector& v) { return reinterpret_cast<CollectionVector&>(AbstractVector<T, Alloc>::operator=(v)); }
-    CollectionVector& operator=(CollectionVector&& v) { return reinterpret_cast<CollectionVector&>(AbstractVector<T, Alloc>::operator=(std::move(v))); }
+    CollectionVector(ssize_t size, const T& t): AbstractVector<T, Alloc>(size, t) {}
+    CollectionVector(ssize_t size): AbstractVector<T, Alloc>(size) {}
+    // CollectionVector& operator=(const CollectionVector& v) { return reinterpret_cast<CollectionVector&>(AbstractVector<T, Alloc>::operator=(v)); }
+    // CollectionVector& operator=(CollectionVector&& v) { return reinterpret_cast<CollectionVector&>(AbstractVector<T, Alloc>::operator=(std::move(v))); }
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& v) override { 
         return *this << v;
     }

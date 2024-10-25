@@ -1,7 +1,9 @@
 #include <iostream>
 #include <iterator>
 #include <complex>
+#include <vector>
 #include "abstract_vector.hpp"
+#include "string_vector.hpp"
 
 using namespace std::literals;
 
@@ -156,7 +158,7 @@ void archived3() {
 
 }
 
-int main() {
+void archived4() {
     CollectionVector<std::string> v1{"Hello"s, "World"s, "This"s, "is"s, "Collection"s, "Vector"s, "Called"s, "v1"s};
     std::cout << v1 << "\r\n";
     v1.pushBack("Yes");
@@ -170,7 +172,39 @@ int main() {
     std::cout << v1 << "\r\n";
     v1.insert(v1.end() - 2, "no no no"s);
     std::cout << v1 << "\r\n";
+    CollectionVector<std::string> v2 = {"VVVVVVVV"s, "22222222"s};
+    v1.insert(v1.begin() + 5, v2.cbegin(), v2.cend());
+    std::cout << v1 << "\r\n";
+    v2 = v1;
+    std::cout << v1 << "\r\n";
+    std::cout << v2 << "\r\n";
+    v1.insert(v1.begin() + 1, v2.cbegin(), v2.cend());
+    std::cout << v1 << "\r\n";
+    v1.insert(v1.begin(), "ddd"s);
+    std::cout << v1 << "\r\n";
+    v1.insert(v1.end(), v2.cbegin(), v2.cend());
+    std::cout << v1 << "\r\n";
 
-    CollectionVector<size_t, CAllocAllocator<size_t>> v2 = {1, 23, 345, 4567, 56789, 0};
+
+    CollectionVector<size_t, CAllocAllocator<size_t>> t = {1, 23, 345, 4567, 56789, 0};
+
+    CollectionVector<std::string> v3(20, "testing"s);
+    std::cout << v3 << "\r\n";
+    CollectionVector<std::string> v4(38);
+    std::cout << v4 << "\r\n";
+    CollectionVector<size_t> t1(17, 0);
+    std::cout << t1 << "\r\n";
+
+}
+
+int main() {
+    StringVector sv1(10, 'd');
+    StringVector sv2(10, 'e');
+    sv1 << sv2;
+    std::cout << sv1 << "\r\n";
+    std::string t1 = "std::string"s;
+    sv1.insert(sv1.begin() + 3, t1.cbegin(), t1.cend());
+    std::cout << sv1 << "\r\n";
     return 0;
 }
+
