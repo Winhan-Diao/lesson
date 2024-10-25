@@ -1,39 +1,39 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <vector>
 #include <algorithm>
 
 using namespace std;
 
-//µÚÒ»²½½¨Á¢Ò»¸ö×îĞ¡ÏîÀà
+//ç¬¬ä¸€æ­¥å»ºç«‹ä¸€ä¸ªæœ€å°é¡¹ç±»
 class Minterm
 {
 public:
 	int data;
-	bool isCoverd; //ÅĞ¶ÏÊÇ·ñÒÑ¾­±»¸²¸ÇÁË
+	bool isCoverd; //åˆ¤æ–­æ˜¯å¦å·²ç»è¢«è¦†ç›–äº†
 	Minterm() {
 		data = 0;
 		isCoverd = false;
 	}
 };
-//µÚ¶ş²½½¨Á¢Ò»¸öÖÊÔÌº­ÏîÀà
+//ç¬¬äºŒæ­¥å»ºç«‹ä¸€ä¸ªè´¨è•´æ¶µé¡¹ç±»
 class Implicant
 {
 public:
-	vector<Minterm*>minterms;//ÎÒÃÇºóĞøĞèÒª´¦ÀíµÄ¶ÔÏó
-	vector<int>binary;//·ÂÔì¿¨ÅµÍ¼£¬ÓÃ¶ş½øÖÆ±àÂë±ãÓÚ´¦Àí
+	vector<Minterm*>minterms;//æˆ‘ä»¬åç»­éœ€è¦å¤„ç†çš„å¯¹è±¡
+	vector<int>binary;//ä»¿é€ å¡è¯ºå›¾ï¼Œç”¨äºŒè¿›åˆ¶ç¼–ç ä¾¿äºå¤„ç†
 	bool isUsed;
 	Implicant() {
 		isUsed = false;
 	}
 	void print() const{
 		for (int i = 0; i < binary.size(); i++) {
-			if (binary[i] == 0) cout << char('A' + i) << "'";  //A'´ú±íA·´
+			if (binary[i] == 0) cout << char('A' + i) << "'";  //A'ä»£è¡¨Aå
 			else if (binary[i] == 1) cout << char('A' + i);
 			if (i < binary.size())cout << "+";
 		}
 	}
 };
-//½«×îĞ¡Ïî±àºÅ×ª»»Îª¶ş½øÖÆ±àÂë
+//å°†æœ€å°é¡¹ç¼–å·è½¬æ¢ä¸ºäºŒè¿›åˆ¶ç¼–ç 
 vector<int>getBinary(int minterm, int digits) {
 	vector<int>binary(digits, 0);
 	for (int i = digits; i > 0; i--) {
@@ -42,7 +42,7 @@ vector<int>getBinary(int minterm, int digits) {
 	}
 	return binary;
 }
-//²éÑ¯Ã¿Ò»¸ö×îĞ¡ÏîÖĞ1µÄ¸öÊı£¬±ãÓÚºóĞø·Ö×é
+//æŸ¥è¯¢æ¯ä¸€ä¸ªæœ€å°é¡¹ä¸­1çš„ä¸ªæ•°ï¼Œä¾¿äºåç»­åˆ†ç»„
 int numbers(const vector<int>& binary) {
 	int count = 0;
 	for (int i = 0; i < binary.size(); i++) {
@@ -50,7 +50,7 @@ int numbers(const vector<int>& binary) {
 	}
 	return count;
 }
-//»¯¼ò¹ı³Ì£¬ÅĞ¶ÏÁ½¸ö¶ş½øÖÆ±àÂë¼äÊÇ·ñÖ»ÓĞÒ»Ïî²»Í¬£¨Á½¸ö¡°1¡±ÊÇ·ñÏàÁÚ£©
+//åŒ–ç®€è¿‡ç¨‹ï¼Œåˆ¤æ–­ä¸¤ä¸ªäºŒè¿›åˆ¶ç¼–ç é—´æ˜¯å¦åªæœ‰ä¸€é¡¹ä¸åŒï¼ˆä¸¤ä¸ªâ€œ1â€æ˜¯å¦ç›¸é‚»ï¼‰
 bool isDifferByOne(vector<int>binary1, vector<int>binary2) {
 	int count = 0;
 	for (int i = 0; i < binary1.size(); i++) {
@@ -60,7 +60,7 @@ bool isDifferByOne(vector<int>binary1, vector<int>binary2) {
 	
 	return count == 1;
 }
-//QMËã·¨ÊµÏÖ
+//QMç®—æ³•å®ç°
 class QM
 {
 public:
@@ -68,7 +68,7 @@ public:
 	int digits = 0;
 	vector<Implicant>primeImplicants;
 	vector<Implicant>essentialImplicants;
-	vector<vector<Implicant>>columns;//´æ´¢·Ö×é½á¹û
+	vector<vector<Implicant>>columns;//å­˜å‚¨åˆ†ç»„ç»“æœ
 	QM() = default;
 	void addData();
 	void initializeColumn();
@@ -82,10 +82,10 @@ public:
 	void result();
 };
 void QM::addData() {
-	cout << "ÇëÊäÈëÂß¼­º¯ÊıµÄ±äÁ¿Êı£º" << endl;
+	cout << "è¯·è¾“å…¥é€»è¾‘å‡½æ•°çš„å˜é‡æ•°ï¼š" << endl;
 	cin >> digits;
-	columns.resize(digits + 1);//»¹ÓĞÈ«ÊÇ0µÄÒ»ÁĞ
-	cout << "ÇëÊäÈëÂß¼­º¯ÊıµÄ×îĞ¡Ïî£¨ÒÔ-1½áÎ²£©£º" << endl;
+	columns.resize(digits + 1);//è¿˜æœ‰å…¨æ˜¯0çš„ä¸€åˆ—
+	cout << "è¯·è¾“å…¥é€»è¾‘å‡½æ•°çš„æœ€å°é¡¹ï¼ˆä»¥-1ç»“å°¾ï¼‰ï¼š" << endl;
 	int mintermsData = 0;
 	while (cin >> mintermsData) {
 		if (mintermsData == -1)break;
@@ -94,7 +94,7 @@ void QM::addData() {
 		minterms.push_back(newMinterms);
 	}
 }
-//Ê¹ÓÃµü´úÆ÷±éÀúÃ¿Ò»¸ö×îĞ¡Ïî,ÒÔ¶ş½øÖÆ±àÂëĞÎÊ½´æÈëcolumnÖĞ£¬³õÊ¼»¯columnµÚÒ»ÁĞ
+//ä½¿ç”¨è¿­ä»£å™¨éå†æ¯ä¸€ä¸ªæœ€å°é¡¹,ä»¥äºŒè¿›åˆ¶ç¼–ç å½¢å¼å­˜å…¥columnä¸­ï¼Œåˆå§‹åŒ–columnç¬¬ä¸€åˆ—
 void QM::initializeColumn() {
 	for (auto& minterm : minterms) {
 		Implicant newImplicant;
@@ -103,14 +103,14 @@ void QM::initializeColumn() {
 		columns[0].push_back(newImplicant);
 	}
 }
-//ÅĞ¶Ï»¯¼òºóµÄ½á¹ûÊÇ·ñÒÑ¾­´æÔÚÓÚcolumnsÖĞ
+//åˆ¤æ–­åŒ–ç®€åçš„ç»“æœæ˜¯å¦å·²ç»å­˜åœ¨äºcolumnsä¸­
 bool QM::isInColumns(const vector<Implicant>& column, const Implicant& Implicant) {
 	for (auto& primeImplicant : column) {
 		if (primeImplicant.binary == Implicant.binary)return true;
 	}
 	return false;
 }
-//¿¨ÅµÈ¦Ê½»¯¼ò
+//å¡è¯ºåœˆå¼åŒ–ç®€
 void QM::simplifyColumns() {
 	for (int i = 0; i < digits; i++) {
 		for (int j = 0; j < columns[i].size(); j++) {
@@ -149,7 +149,7 @@ void QM::generatePrimeImplicant() {
 bool QM::isCoverdJustOnce(const Minterm& minterm) {
 	int count = 0;
 	for (auto& primeImplicant : primeImplicants) {
-		//ÅĞ¶ÏÃ¿¸ö×îĞ¡ÏîÊÇ·ñÖ»±»È¦¹ıÒ»´Î£¬Èç¹ûÊÇ£¬ÄÇ¾ÍÖ»ÓĞÁ½ÖÖÇé¿ö£¬µ¥¸ö¡°1¡±»òÊÇµ¥¸öÈ¦£¬ÓÃÓÚºóĞøÕÒµ½±ØÒªÖÊÔÌº­Ïî
+		//åˆ¤æ–­æ¯ä¸ªæœ€å°é¡¹æ˜¯å¦åªè¢«åœˆè¿‡ä¸€æ¬¡ï¼Œå¦‚æœæ˜¯ï¼Œé‚£å°±åªæœ‰ä¸¤ç§æƒ…å†µï¼Œå•ä¸ªâ€œ1â€æˆ–æ˜¯å•ä¸ªåœˆï¼Œç”¨äºåç»­æ‰¾åˆ°å¿…è¦è´¨è•´æ¶µé¡¹
 		if (find(primeImplicant.minterms.begin(), primeImplicant.minterms.end(), &minterm) != primeImplicant.minterms.end())count++;
 	}
 	return count==1;
