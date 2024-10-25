@@ -108,19 +108,24 @@ protected:
 public:
     AbstractVector(): alloc(), data(nullptr), size(0), volume(0) {}
     AbstractVector(const T* const& data, size_t size): alloc(), data(size? a_t_t::allocate(alloc, size): nullptr), size(size), volume(size) {
-        if (data)
-            std::copy(data, data + size, this->data);       //flaky
+        if (data) {
+            if constexpr (std::is_trivially_copyable_v<T>)
+                std::copy(data, data + size, this->data);       //flaky
+            else
+                for (size_t i = 0; i < size; ++i) construct(&this->data[i], data[i]);
+        }
+            
     }
     AbstractVector(const AbstractVector& v, size_t i): alloc(v.alloc), data(a_t_t::allocate(alloc, std::max(i, v.volume))), size(v.size), volume(std::max(i, v.volume)) {
         if constexpr (std::is_trivially_copyable_v<value_type>)
             std::memcpy(reinterpret_cast<void *>(data), reinterpret_cast<const void *>(v.data), sizeof(value_type) * v.size);
         else
-            for (size_t i = 0; i < size; ++i) assignThanConstruct(&data[i], v.data[i]);
+            for (size_t i = 0; i < size; ++i) construct(&data[i], v.data[i]);
     }
     AbstractVector(const AbstractVector& v): AbstractVector(v, 0) {
         std::cout << "[debug] Copy Constructor Called" << "\r\n";       //debug
     }
-    AbstractVector(AbstractVector&& v): alloc(std::move(v.alloc)), data(v.data), size(v.size), volume(v.volume) {
+    AbstractVector(AbstractVector&& v) noexcept: alloc(std::move(v.alloc)), data(v.data), size(v.size), volume(v.volume) {
         v.data = nullptr;
         v.size = 0;
         v.volume = 0;
@@ -171,7 +176,7 @@ public:
         }
         return *this;
     }
-    AbstractVector& operator= (AbstractVector&& v) {
+    AbstractVector& operator= (AbstractVector&& v) noexcept {
         if (data == v.data) return *this;
         deleteAll();
         data = v.data;
@@ -229,7 +234,8 @@ public:
             pos = begin() + distance;
         }
         if constexpr (std::is_trivially_copyable_v<value_type>) {
-            std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + 1).operator->()));
+            std::memmove(reinterpret_cast<void *>((pos + 1).operator->()), reinterpret_cast<void *>(pos.operator->()), sizeof(value_type) * (end() - pos));
+            // std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + 1).operator->()));
         } else {
             construct(end().operator->(), std::move(*(end() - 1)));
             std::move_backward(pos, end() - 1, end());
@@ -254,7 +260,8 @@ public:
             pos = begin() + distance;
         }
         if constexpr (std::is_trivially_copyable_v<value_type>) {
-            std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + inputSize).operator->()));
+            std::memmove(reinterpret_cast<void *>((pos + inputSize).operator->()), reinterpret_cast<void *>(pos.operator->()), sizeof(value_type) * (end() - pos));
+            // std::copy_backward(reinterpret_cast<char *>(pos.operator->()), reinterpret_cast<char *>(end().operator->()), reinterpret_cast<char *>((end() + inputSize).operator->()));
             std::copy(first, last, pos);        // std::copy may boil down to memmove, which is good
         } else {
             std::ptrdiff_t toShift = end() - pos;
@@ -264,17 +271,13 @@ public:
             std::ptrdiff_t toAssign = toMoveConstruct;
             for (size_t i = 0; i < toMoveConstruct; ++i)
                 construct((end() - 1 + inputSize - i).operator->(), std::move(*(end() - 1 - i)));
-            // for (size_t i = 0; i < toMoveAssign; ++i)
             if (toMoveAssign)
                 std::move_backward(pos, pos + toMoveAssign, end());
-            // if (toConstruct)
             for (size_t i = 0; i < toConstruct; ++i)
                 construct((end() - 1 + toConstruct - i).operator->(), *(last - 1 - i));
             if (toAssign)
                 std::copy(first, first + toAssign, pos);
-            // std::move_backward(pos, end() - inputSize, end());
         }
-        // std::copy(first, last, pos);
         size += inputSize;
         return pos;
     }
@@ -346,7 +349,6 @@ public:
 
     virtual AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) = 0;       // vector:数值加；string:追加
     virtual std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const = 0;       // vector:数值加；string:追加
-    [[deprecated]]virtual AbstractVector<T, Alloc>& operator<<(long long) = 0;       // The idea is so stupid that now it's deprecated
     template<class _Alloc>
     AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, _Alloc>& v) {
         if (this->volume < (this->size + v.getSize())) {
@@ -387,7 +389,6 @@ public:
     DebugVector(const DebugVector& v): AbstractVector<T, Alloc>(v) {}
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) override { return *this; }       // vector:数值加；string:追加
     std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const override { return std::make_unique<DebugVector<T, Alloc>>(*this); }       // vector:数值加；string:追加
-    [[deprecated]]AbstractVector<T, Alloc>& operator<<(long long) override { return *this; }
 };
 
 template <class T, class Alloc = std::allocator<T>>
@@ -409,10 +410,9 @@ public:
     }
     std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>& v) const override { 
         auto neoVector = std::make_unique<CollectionVector<T, Alloc>>(*this);
-
         throw std::runtime_error{"Not supported for CollectionVector"};
     }
-    [[deprecated]]AbstractVector<T, Alloc>& operator<<(long long) override { throw std::runtime_error{"Not supported for CollectionVector"}; }
+    ~CollectionVector() noexcept override = default;
 };
 
 template <class T>

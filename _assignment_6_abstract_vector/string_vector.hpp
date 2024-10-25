@@ -1,11 +1,12 @@
 #pragma once
 #include <string_view>
+#include <cstring>
 #include "abstract_vector.hpp"
 #include "c_alloc_allocator.hpp"
 /*
     [x] ""svc  
     [x] append  
-    [xs] insert(pos, SVec)  
+    [x] insert(pos, SVec)  
     [x] insert(pos, CStr, size)  
     [x] insert(pos, CStr)  
     [x] substr
@@ -21,6 +22,15 @@ public:
     StringVector(std::initializer_list<char> l): AbstractVector<char, Alloc>(l) {}
     StringVector(size_t size): AbstractVector<char, Alloc>(size) {}
     StringVector(size_t size, const char& t): AbstractVector<char, Alloc>(size, t) {}
+    StringVector(const std::string& str): AbstractVector<char, Alloc>(str.data(), str.size()) {}
+    StringVector& operator= (const std::string& str) {
+        if (str.size() > this->volume) {
+            this->expand(str.size() - this->volume);
+        }
+        std::memcpy(reinterpret_cast<void *>(this->begin().operator->()), reinterpret_cast<const void *>(str.data()), sizeof(char) * str.size());  // Fixed spelling of 'operator->'
+        this->size = str.size();
+        return *this;
+    }
     AbstractVector<char, Alloc>& operator+=(const AbstractVector<char, Alloc>& v) override { 
         return *this << v;
     }
@@ -29,7 +39,6 @@ public:
         *neoVector << v;
         return neoVector;
     }
-    [[deprecated]]AbstractVector<char, Alloc>& operator<<(long long) override { throw std::runtime_error{"Not supported for StringVector"}; }
     template <class _Alloc>
     StringVector& append(const AbstractVector<char, _Alloc>& v) {
         return *this << v;
@@ -61,7 +70,10 @@ public:
         arr[this->size] = '\0';
         return arr;
     }
-    ~StringVector() override = default;
+    operator std::string() {
+        return std::string(this->data, this->size);
+    }
+    ~StringVector() noexcept override = default;
     template <class _Alloc>
     friend std::ostream& operator<<(std::ostream&, const StringVector<_Alloc>&);
 };
@@ -71,6 +83,14 @@ std::ostream& operator<<(std::ostream& os, const StringVector<Alloc>& sVec) {
     if (sVec.size)
         os << std::string_view(&*sVec.cbegin(), sVec.size);
     return os;
+}
+
+template <class Alloc>
+std::istream& operator>>(std::istream& is, StringVector<Alloc>& sVec) {
+    std::string tmpBuffer;
+    is >> tmpBuffer;
+    sVec = tmpBuffer;
+    return is;
 }
 
 StringVector<CAllocAllocator<char>> operator""_sv(const char *str, size_t size) {

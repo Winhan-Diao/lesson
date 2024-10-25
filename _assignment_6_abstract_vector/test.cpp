@@ -214,6 +214,16 @@ int main() {
     auto uArr = sv3.c_str();
     std::cout << uArr.get() << "\r\n";
     std::cout << sv3 << "\r\n";
+    std::string s1 = "function convertion to string test"_sv;
+    std::cout << s1 << "\r\n";
+    StringVector sv4 = s1;
+    std::cout << sv4 << "\r\n";
+    sv4.insert(sv4.begin() + 8, '!');
+    std::cout << sv4 << "\r\n";
+    StringVector sv5;
+    std::cout << sv5 << "\r\n";
+    // std::cin >> sv5;
+    // std::cout << sv5;
     return 0;
 }
 
