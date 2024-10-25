@@ -107,7 +107,7 @@ protected:
     }
 public:
     AbstractVector(): alloc(), data(nullptr), size(0), volume(0) {}
-    AbstractVector(T* const& data, size_t size): alloc(), data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
+    AbstractVector(const T* const& data, size_t size): alloc(), data(size? a_t_t::allocate(alloc, size): nullptr), size(size), volume(size) {
         if (data)
             std::copy(data, data + size, this->data);       //flaky
     }
@@ -383,7 +383,7 @@ class DebugVector: public AbstractVector<T, Alloc> {
 public:
     using AbstractVector<T, Alloc>::operator<<;
     DebugVector() = default;
-    DebugVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
+    DebugVector(const T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
     DebugVector(const DebugVector& v): AbstractVector<T, Alloc>(v) {}
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) override { return *this; }       // vector:数值加；string:追加
     std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const override { return std::make_unique<DebugVector<T, Alloc>>(*this); }       // vector:数值加；string:追加
@@ -395,7 +395,7 @@ class CollectionVector: public AbstractVector<T, Alloc> {
 public:
     using AbstractVector<T, Alloc>::operator<<;
     CollectionVector() = default;
-    CollectionVector(T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
+    CollectionVector(const T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
     // CollectionVector(const CollectionVector& v): CollectionVector(v, 0) {}
     CollectionVector(const CollectionVector& v, size_t i): AbstractVector<T, Alloc>(v, i) {}
     // CollectionVector(CollectionVector&& v): AbstractVector<T, Alloc>(std::move(v)) {}
