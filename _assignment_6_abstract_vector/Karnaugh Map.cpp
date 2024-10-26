@@ -12,7 +12,7 @@
 using namespace std;
 template <class T, class Alloc = std::allocator<T>>
 //第一步建立一个最小项类
-class Minterm:public AbstractVector<T, Alloc>
+class Minterm:public CollectionVector<T, Alloc>
 {
 public:
 	int data;
@@ -24,11 +24,11 @@ public:
 };
 //第二步建立一个质蕴涵项类
 template <class T, class Alloc = std::allocator<T>>
-class Implicant:public AbstractVector<T,Alloc>
+class Implicant:public CollectionVector<T,Alloc>
 {
 public:
-	std::unique_ptr<AbstractVector<Minterm<T, Alloc>, Alloc>*>minterms;//我们后续需要处理的对象
-	std::unique_ptr<AbstractVector<int>> binary;//仿造卡诺图，用二进制编码便于处理
+	std::unique_ptr<CollectionVector<Minterm<T, Alloc>, Alloc>*>minterms;//我们后续需要处理的对象
+	std::unique_ptr<CollectionVector<int>> binary;//仿造卡诺图，用二进制编码便于处理
 	bool isUsed;
 	Implicant() {
 		isUsed = false;
@@ -41,14 +41,14 @@ public:
 		}
 		cout << endl; // 输出完后换行
 	}
-	AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& other)override {
-		cout << endl;
-		return *this;
-	};
-	AbstractVector<T, Alloc>& operator<<(long long) override {
-		cout << endl;
-		return *this;
-	}
+	//CollectionVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& other)override {
+	//	cout << endl;
+	//	return *this;
+	//};
+	//CollectionVector<T, Alloc>& operator<<(long long) override {
+	//	cout << endl;
+	//	return *this;
+	//}
 };
 //将最小项编号转换为二进制编码
 //static std::unique_ptr<AbstractVector<int, AbstractVector<int>::allocator_type>> getBinary(int minterm, int digits) {
@@ -61,7 +61,7 @@ public:
 //}
 
 //化简过程，判断两个二进制编码间是否只有一项不同（两个“1”是否相邻）
-bool isDifferByOne(const AbstractVector<int>& binary1, const AbstractVector<int>& binary2) {
+bool isDifferByOne(const CollectionVector<int>& binary1, const CollectionVector<int>& binary2) {
 	int count = 0;
 	for (int i = 0; i < binary1.getSize(); i++) {
 		if (binary1[i] != binary2[i])count++;
@@ -72,19 +72,19 @@ bool isDifferByOne(const AbstractVector<int>& binary1, const AbstractVector<int>
 }
 //QM算法实现
 template <class T, class Alloc = std::allocator<T>>
-class QM :public AbstractVector<T, Alloc>
+class QM :public CollectionVector<T, Alloc>
 {
 public:
-	std::unique_ptr<AbstractVector<Minterm<T, Alloc>, Alloc>> minterms;
+	std::unique_ptr<CollectionVector<Minterm<T, Alloc>, Alloc>> minterms;
 	int digits = 0;
-	std::unique_ptr<AbstractVector<Implicant<T, Alloc>,Alloc>>primeImplicants;
-	std::unique_ptr<AbstractVector<Implicant<T, Alloc>,Alloc>>essentialImplicants;
-	std::unique_ptr<AbstractVector<AbstractVector<Implicant<T, Alloc>,Alloc>,Alloc>>columns;//存储分组结果
+	std::unique_ptr<CollectionVector<Implicant<T, Alloc>,Alloc>>primeImplicants;
+	std::unique_ptr<CollectionVector<Implicant<T, Alloc>,Alloc>>essentialImplicants;
+	std::unique_ptr<CollectionVector<CollectionVector<Implicant<T, Alloc>,Alloc>,Alloc>>columns;//存储分组结果
 	QM() = default;
 	void addData();
 	void initializeColumn();
 	void simplifyColumns();
-	bool isInColumns(const AbstractVector<Implicant<T,Alloc>>& column, const Implicant<T, Alloc>& Implicant);
+	bool isInColumns(const CollectionVector<Implicant<T,Alloc>>& column, const Implicant<T, Alloc>& Implicant);
 	void generatePrimeImplicant();
 	bool isCoverdJustOnce(const Minterm<T,Alloc>& minterm);
 	void generateEssentialPrimeImplicant();
@@ -92,22 +92,22 @@ public:
 	void extractEssentialPrimeImplicant();
 	void result();
 	void run();
-	AbstractVector <int> getbinary(int minterm, int digits) {
-		AbstractVector<int>binary;
+	CollectionVector <int> getbinary(int minterm, int digits) {
+		CollectionVector<int>binary;
 		for (int i = digits; i > 0; i--) {
 			binary.set(i, minterm%2);
 			minterm /= 2;
 		}
 		return binary;
 	};
-	AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& other)override {
-		cout << endl;
-		return *this;
-	};
-	AbstractVector<T, Alloc>& operator<<(long long)  override{ 
-		cout << endl; 
-		return *this;
-	}
+	//CollectionVector<T, Alloc>& operator+=(const CollectionVector<T, Alloc>& other)override {
+	//	cout << endl;
+	//	return *this;
+	//};
+	//CollectionVector<T, Alloc>& operator<<(long long)  override{
+	//	cout << endl; 
+	//	return *this;
+	//}
 };
 //template <class T, class Alloc>
 //AbstractVector <int>QM<T,Alloc>::getbinary(int minterm, int digits) {
@@ -144,7 +144,7 @@ void QM<T,Alloc>::initializeColumn() {
 }
 //判断化简后的结果是否已经存在于columns中
 template <class T, class Alloc>
-bool QM<T,Alloc>::isInColumns(const AbstractVector<Implicant<T, Alloc>>& column, const Implicant<T, Alloc>& Implicant) {
+bool QM<T,Alloc>::isInColumns(const CollectionVector<Implicant<T, Alloc>>& column, const Implicant<T, Alloc>& Implicant) {
 	for (auto& primeImplicant : column) {
 		if (primeImplicant.binary == Implicant.binary)return true;
 	}
