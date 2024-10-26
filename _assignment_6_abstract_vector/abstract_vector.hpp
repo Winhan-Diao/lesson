@@ -348,7 +348,6 @@ public:
     }
 
     virtual AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) = 0;       // vector:数值加；string:追加
-    virtual std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const = 0;       // vector:数值加；string:追加
     template<class _Alloc>
     AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, _Alloc>& v) {
         if (this->volume < (this->size + v.getSize())) {
