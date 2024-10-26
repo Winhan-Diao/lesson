@@ -11,7 +11,6 @@ public:
 		this->data=this->alloc.allocate(n);
 		memset(this->data,0,n*sizeof(T));
 	}
-	MathVector(const MathVector& c):AbstractVector<T,Alloc>(c){}
 
 	AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& c)override{
 		if(c.getSize()!=this->size){
@@ -22,7 +21,7 @@ public:
 		}
 		return *this;
 	}      // vector:数值加
-    std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>& c) const override{
+    MathVector<T,Alloc> operator+(const AbstractVector<T, Alloc>& c) const{
 		if(c.getSize() !=this->size){
 			throw "size not equal";
 		}
@@ -30,8 +29,7 @@ public:
 		for(size_t i=0;i<this->size;i++){
 			res[i]=this->data[i]+c[i];
 		}
-		return std::make_unique<MathVector<T, Alloc>>(std::move(res));
+		return res;
 	}   
-	[[deprecated]]AbstractVector<T, Alloc>& operator<<(long long) override { throw std::runtime_error{"Not supported for CollectionVector"}; }
 	
 };
