@@ -268,7 +268,6 @@ void stdVectorTimePushBack() {
     auto t2 = std::chrono::high_resolution_clock::now();
     std::cout << "std::vector: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << "\r\n";
 }
-
 int main() {
     // std::thread t1(collectionVectorInsert);
     // std::thread t2(stdVectorTimeInsert);

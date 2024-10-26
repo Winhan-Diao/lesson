@@ -370,7 +370,9 @@ public:
     size_t getSize() const {
         return size;
     }
-
+    void set(int dex, int minterm) {
+        data[dex] = minterm;
+    }
     virtual ~AbstractVector() noexcept {
         deleteAll();
     }
