@@ -16,13 +16,11 @@ public:
 	MathVector(size_t n):AbstractVector<T,Alloc>(){
 		this->expand(n);
 		this->size=n;
-		this->data=this->alloc.allocate(n);
 		memset(this->data,0,n*sizeof(T));
 	}
 	MathVector(size_t n,const T &x):AbstractVector<T,Alloc>(){
 		this->expand(n);
 		this->size=n;
-		this->data=this->alloc.allocate(n);
 		std::fill(this->begin(),this->end(),x);
 	}
 	//因为继承后没有新的成员数据需要声明，所以析构和其余构造直接继承
@@ -34,7 +32,6 @@ public:
 		this->deleteAll();//释放空间
 		this->expand(n);
 		this->size=n;
-		this->data=this->alloc.allocate(n);
 		memset(this->data,0,n*sizeof(T));
 	}
 	void clearzero(){//清0
