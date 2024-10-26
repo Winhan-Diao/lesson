@@ -17,6 +17,7 @@ int main(){
 	test();
 	return 0;
 }
+
 int Pos(char ch, const char *str)			// 返回指定字符ch在字符串str中的下标。不存在时返回-1
 {
 	int i;

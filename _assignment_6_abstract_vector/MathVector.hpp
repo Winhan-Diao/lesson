@@ -28,9 +28,7 @@ public:
 	//因为继承后没有新的成员数据需要声明，所以析构和其余构造直接继承
 	void resize(const size_t& n=0){//重构,清空并改变大小
 		if(n==0){
-			this->size=0;
-			this->alloc.deallocate(this->data,this->size);
-			this->data=nullptr;
+			clear();
 			return;
 		}
 		this->deleteAll();//释放空间
@@ -44,11 +42,6 @@ public:
 			return;
 		}
 		memset(this->data,0,this->size*sizeof(T));
-	}
-	void clear(){// 完全清空，包括空间
-		this->deleteAll();
-		this->size=0;
-		this->volume=1;
 	}
 	AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& c)noexcept override{
 		if(c.getSize()==0){
