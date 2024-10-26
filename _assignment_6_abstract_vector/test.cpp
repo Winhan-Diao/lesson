@@ -2,6 +2,9 @@
 #include <iterator>
 #include <complex>
 #include <vector>
+#include <chrono>
+#include <ctime>
+#include <thread>
 #include "abstract_vector.hpp"
 #include "string_vector.hpp"
 
@@ -197,7 +200,7 @@ void archived4() {
 
 }
 
-int main() {
+void archived5() {
     StringVector sv1(10, 'd');
     StringVector sv2(10, 'e');
     sv1 << sv2;
@@ -224,6 +227,55 @@ int main() {
     std::cout << sv5 << "\r\n";
     // std::cin >> sv5;
     // std::cout << sv5;
+}
+
+void collectionVectorInsert() {
+    auto t1 = std::chrono::high_resolution_clock::now();
+    CollectionVector<double, CAllocAllocator<double>> v{.1, .2, .3};
+    for (int i = 0; i < 100'000; ++i) {
+        v.insert(v.begin() + 2, i / 1000.);
+    }
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::cout << "CollectionVector: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << "\r\n";
+}
+
+void stdVectorTimeInsert() {
+    auto t1 = std::chrono::high_resolution_clock::now();
+    std::vector<double> v{.1, .2, .3};
+    for (int i = 0; i < 100'000; ++i) {
+        v.insert(v.begin() + 2, i / 1000.);
+    }
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::cout << "std::vector: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << "\r\n";
+}
+
+void collectionVectorPushBack() {
+    auto t1 = std::chrono::high_resolution_clock::now();
+    CollectionVector<double> v{.1, .2, .3};
+    for (int i = 0; i < 100'000; ++i) {
+        v.pushBack(i / 1000.);
+    }
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::cout << "CollectionVector: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << "\r\n";
+}
+
+void stdVectorTimePushBack() {
+    auto t1 = std::chrono::high_resolution_clock::now();
+    std::vector<double> v{.1, .2, .3};
+    for (int i = 0; i < 100'000; ++i) {
+        v.push_back(i / 1000.);
+    }
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::cout << "std::vector: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << "\r\n";
+}
+
+int main() {
+    // std::thread t1(collectionVectorInsert);
+    // std::thread t2(stdVectorTimeInsert);
+    std::thread t1(collectionVectorPushBack);
+    std::thread t2(stdVectorTimePushBack);
+    t1.join();
+    t2.join();
     return 0;
 }
 

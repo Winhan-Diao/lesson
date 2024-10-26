@@ -54,7 +54,7 @@ protected:
             volume = 1.5 * volume + 1;
         }
         if constexpr (std::is_same_v<allocator_type, CAllocAllocator<T>>) {
-            std::cout << "[debug] CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
+            // std::cout << "[debug] CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
             alloc.reallocate(data, volume);
         } else {
             T *neoData = a_t_t::allocate(alloc, volume);
@@ -123,7 +123,7 @@ public:
             for (size_t i = 0; i < size; ++i) construct(&data[i], v.data[i]);
     }
     AbstractVector(const AbstractVector& v): AbstractVector(v, 0) {
-        std::cout << "[debug] Copy Constructor Called" << "\r\n";       //debug
+        // std::cout << "[debug] Copy Constructor Called" << "\r\n";       //debug
     }
     AbstractVector(AbstractVector&& v) noexcept: alloc(std::move(v.alloc)), data(v.data), size(v.size), volume(v.volume) {
         v.data = nullptr;
@@ -348,7 +348,7 @@ public:
     }
 
     virtual AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) = 0;       // vector:数值加；string:追加
-    virtual std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const = 0;       // vector:数值加；string:追加
+    // virtual std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const = 0;       // vector:数值加；string:追加
     template<class _Alloc>
     AbstractVector<T, Alloc>& operator<<(const AbstractVector<T, _Alloc>& v) {
         if (this->volume < (this->size + v.getSize())) {
@@ -388,7 +388,6 @@ public:
     DebugVector(const T* const& data, size_t size): AbstractVector<T, Alloc>(data, size) {}
     DebugVector(const DebugVector& v): AbstractVector<T, Alloc>(v) {}
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>&) override { return *this; }       // vector:数值加；string:追加
-    std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>&) const override { return std::make_unique<DebugVector<T, Alloc>>(*this); }       // vector:数值加；string:追加
 };
 
 template <class T, class Alloc = std::allocator<T>>
@@ -407,10 +406,6 @@ public:
     // CollectionVector& operator=(CollectionVector&& v) { return reinterpret_cast<CollectionVector&>(AbstractVector<T, Alloc>::operator=(std::move(v))); }
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& v) override { 
         return *this << v;
-    }
-    std::unique_ptr<AbstractVector<T, Alloc>> operator+(const AbstractVector<T, Alloc>& v) const override { 
-        auto neoVector = std::make_unique<CollectionVector<T, Alloc>>(*this);
-        throw std::runtime_error{"Not supported for CollectionVector"};
     }
     ~CollectionVector() noexcept override = default;
 };

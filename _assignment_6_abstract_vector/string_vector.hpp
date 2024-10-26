@@ -34,11 +34,11 @@ public:
     AbstractVector<char, Alloc>& operator+=(const AbstractVector<char, Alloc>& v) override { 
         return *this << v;
     }
-    std::unique_ptr<AbstractVector<char, Alloc>> operator+(const AbstractVector<char, Alloc>& v) const override { 
-        auto neoVector = std::make_unique<StringVector<Alloc>>(*this);
-        *neoVector << v;
-        return neoVector;
-    }
+    // std::unique_ptr<AbstractVector<char, Alloc>> operator+(const AbstractVector<char, Alloc>& v) const override { 
+    //     auto neoVector = std::make_unique<StringVector<Alloc>>(*this);
+    //     *neoVector << v;
+    //     return neoVector;
+    // }
     template <class _Alloc>
     StringVector& append(const AbstractVector<char, _Alloc>& v) {
         return *this << v;
