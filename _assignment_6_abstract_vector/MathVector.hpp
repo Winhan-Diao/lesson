@@ -26,7 +26,7 @@ public:
 	//因为继承后没有新的成员数据需要声明，所以析构和其余构造直接继承
 	void resize(const size_t& n=0){//重构,清空并改变大小
 		if(n==0){
-			clear();
+			this->clear();
 			return;
 		}
 		this->deleteAll();//释放空间

@@ -105,11 +105,17 @@ void IN_test(){
 	int n1,n2;
 	cin>>n1;
 	v1.resize(n1);
+	std::cin.clear(); // 清除错误状态
+	std::fflush(stdin);		//防止多输入从而影响其它测试进程。
 	col(3),cout<<"输入v1各维度的值:",col(0);
 	for(int i=0;i<n1;i++) cin>>v1[i];
-	col(3),cout<<"输入v2的维度:",col(0);
+	col(3),cout<<"输入v2的维度:",col(0);	
+	std::cin.clear(); // 清除错误状态
+	std::fflush(stdin);		//防止多输入从而影响其它测试进程。
 	cin>>n2;
-	v2.resize(n2);
+	v2.resize(n2);	
+	std::cin.clear(); // 清除错误状态
+	std::fflush(stdin);		//防止多输入从而影响其它测试进程。
 	col(3),cout<<"输入v2各维度的值:",col(0);
 	for(int i=0;i<n2;i++) cin>>v2[i];
 	col('b'),cout<<"v1 v2:",col('w');
