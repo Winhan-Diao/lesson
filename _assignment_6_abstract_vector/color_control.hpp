@@ -1,3 +1,4 @@
+#pragma once
 #include <windows.h>
 void col(char msg){
 	if(msg=='r'||msg==1) SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED);//设置红色

@@ -19,7 +19,37 @@ public:
 		this->data=this->alloc.allocate(n);
 		memset(this->data,0,n*sizeof(T));
 	}
-
+	MathVector(size_t n,const T &x):AbstractVector<T,Alloc>(){
+		this->expand(n);
+		this->size=n;
+		this->data=this->alloc.allocate(n);
+		std::fill(this->begin(),this->end(),x);
+	}
+	//因为继承后没有新的成员数据需要声明，所以析构和其余构造直接继承
+	void resize(const size_t& n=0){//重构,清空并改变大小
+		if(n==0){
+			this->size=0;
+			this->alloc.deallocate(this->data,this->size);
+			this->data=nullptr;
+			return;
+		}
+		this->deleteAll();//释放空间
+		this->expand(n);
+		this->size=n;
+		this->data=this->alloc.allocate(n);
+		memset(this->data,0,n*sizeof(T));
+	}
+	void clearzero(){//清0
+		if(this->size==0){
+			return;
+		}
+		memset(this->data,0,this->size*sizeof(T));
+	}
+	void clear(){// 完全清空，包括空间
+		this->deleteAll();
+		this->size=0;
+		this->volume=1;
+	}
 	AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& c)noexcept override{
 		if(c.getSize()==0){
 			return *this;
@@ -210,6 +240,8 @@ public:
 		}
 		return angle(c);
 	}// 夹角计算带异常处理，抛出异常
+	template<class Ts> friend double angle(const MathVector<Ts> &a,const MathVector<Ts> &b)noexcept;
+	template<class Ts> friend double angle_err(const MathVector<Ts> &a,const MathVector<Ts> &b);
 	void Rand(){
 		if(this->size==0) return;
 		for(size_t i=0;i<this->size;i++){
@@ -221,4 +253,12 @@ template <class Ts>
 inline MathVector<Ts> operator*(const Ts &c, const MathVector<Ts> &v)
 {
 	return v*c;
+}
+template <class Ts>
+double angle(const MathVector<Ts> &a, const MathVector<Ts> &b)noexcept{
+	return a.angle(b);
+}
+template<class Ts>
+double angle_err(const MathVector<Ts> &a, const MathVector<Ts> &b){
+	return a.angle_err(b);
 }
