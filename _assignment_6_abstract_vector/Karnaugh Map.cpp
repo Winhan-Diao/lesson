@@ -14,10 +14,10 @@ template <class T, class Alloc = std::allocator<T>>
 class Minterm:public CollectionVector<T, Alloc>
 {
 public:
-	int data;
+	int data1;
 	bool isCoverd; //判断是否已经被覆盖了
-	Minterm() {
-		data = 0;
+	Minterm():CollectionVector<T,Alloc> (){
+		data1 = 0;
 		isCoverd = false;
 	}
 };
@@ -27,16 +27,16 @@ class Implicant:public CollectionVector<T,Alloc>
 {
 public:
 	CollectionVector<Minterm<T, Alloc>*, Alloc>minterms;//我们后续需要处理的对象
-	CollectionVector<int> binary;//仿造卡诺图，用二进制编码便于处理
+	CollectionVector<T,Alloc> binary;//仿造卡诺图，用二进制编码便于处理
 	bool isUsed;
-	Implicant() {
+	Implicant() :CollectionVector<T, Alloc>(){
 		isUsed = false;
 	}
 	void print() const {
-		for (size_t i = 0; i < binary.size(); i++) {
+		for (size_t i = 0; i < binary.getsize(); i++) {
 			if (binary[i] == 0) cout << char('A' + i) << "'"; // A'代表A反
 			else if (binary[i] == 1) cout << char('A' + i);
-			if (i < binary.size() - 1) cout << "+"; // 避免最后一个元素后输出 "+"
+			if (i < binary.getsize() - 1) cout << "+"; // 避免最后一个元素后输出 "+"
 		}
 		cout << endl; // 输出完后换行
 	}
@@ -60,8 +60,8 @@ public:
 //}
 
 //化简过程，判断两个二进制编码间是否只有一项不同（两个“1”是否相邻）
-
-bool isDifferByOne(const CollectionVector<int>& binary1, const CollectionVector<int>& binary2) {
+template <class T, class Alloc = std::allocator<T>>
+bool isDifferByOne(const CollectionVector<T, Alloc>& binary1, const CollectionVector<T, Alloc>& binary2) {
 	int count = 0;
 	for (int i = 0; i < binary1.getSize(); i++) {
 		if (binary1[i] != binary2[i])count++;
@@ -80,7 +80,7 @@ public:
 	CollectionVector<Implicant<T, Alloc>,Alloc>primeImplicants;
 	CollectionVector<Implicant<T, Alloc>,Alloc>essentialImplicants;
 	CollectionVector<CollectionVector<Implicant<T, Alloc>,Alloc>,Alloc>columns;//存储分组结果
-	QM() = default;
+	QM() :CollectionVector<T, Alloc>(){};
 	void addData();
 	void initializeColumn();
 	void simplifyColumns();
@@ -92,10 +92,10 @@ public:
 	void extractEssentialPrimeImplicant();
 	void result();
 	void run();
-	CollectionVector <int> getbinary(int minterm, int digits) {
-		CollectionVector<int>binary;
+	CollectionVector <T, Alloc> getbinary(int minterm, int digits) {
+		CollectionVector<T, Alloc>binary;
 		for (int i = digits; i > 0; i--) {
-			binary.set(i, minterm%2);
+			binary[i]=minterm%2;
 			minterm /= 2;
 		}
 		return binary;
@@ -129,7 +129,7 @@ void QM<T, Alloc>::addData(){
 		if (mintermsData == -1)break;
 		Minterm newMinterms;
 		newMinterms.data = mintermsData;
-		minterms.push_back(newMinterms);
+		minterms.pushBack(newMinterms);
 	}
 }
 //使用迭代器遍历每一个最小项,以二进制编码形式存入column中，初始化column第一列
@@ -137,9 +137,9 @@ template <class T, class Alloc>
 void QM<T,Alloc>::initializeColumn() {
 	for (auto& minterm : minterms) {
 		Implicant newImplicant;
-		newImplicant.minterms.push_back(&minterm);
+		newImplicant.minterms.pushBack(&minterm);
 		newImplicant.binary = getBinary(minterm.data, digits);
-		columns[0].push_back(newImplicant);
+		columns[0].pushBack(newImplicant);
 	}
 }
 //判断化简后的结果是否已经存在于columns中
@@ -151,11 +151,12 @@ bool QM<T,Alloc>::isInColumns(const CollectionVector<Implicant<T, Alloc>>& colum
 	return false;
 }
 //卡诺圈式化简
+
 template <class T, class Alloc>
 void QM<T, Alloc>::simplifyColumns() {
 	for (int i = 0; i < digits; i++) {
-		for (int j = 0; j < columns[i].size(); j++) {
-			for (int k = j + 1; k < columns[i].size(); k++) {
+		for (int j = 0; j < columns[i].getsize(); j++) {
+			for (int k = j + 1; k < columns[i].getsize(); k++) {
 				Implicant<T, Alloc>& lastImplicant1 = columns[i][j];
 				Implicant<T, Alloc>& lastImplicant2 = columns[i][k];
 				if (isDifferByOne(lastImplicant1.binary, lastImplicant2.binary)) {
@@ -163,7 +164,7 @@ void QM<T, Alloc>::simplifyColumns() {
 					lastImplicant2.isUsed = true;
 					Implicant newImpliant;
 					newImpliant.binary = lastImplicant1.binary;
-					for (int i = 0; i < newImpliant.binary.size(); i++) {
+					for (int i = 0; i < newImpliant.binary.getsize(); i++) {
 						if (newImpliant.binary[i] != lastImplicant2.binary[i]) {
 							newImpliant.binary[i] = -1;
 							break;
@@ -171,7 +172,7 @@ void QM<T, Alloc>::simplifyColumns() {
 					}
 					newImpliant.minterms.insert(newImpliant.minterms.begin(), lastImplicant1.minterms.begin(), lastImplicant1.minterms.end());
 					newImpliant.minterms.insert(newImpliant.minterms.begin(), lastImplicant1.minterms.begin(), lastImplicant1.minterms.end());
-					if (!isInColumns(columns[i + 1], newImpliant)) columns[i + 1].push_back(newImpliant);
+					if (!isInColumns(columns[i + 1], newImpliant)) columns[i + 1].pushBack(newImpliant);
 				}
 			}
 		}
@@ -183,7 +184,7 @@ void QM<T,Alloc>::generatePrimeImplicant() {
 		for (auto& minterm : column) {
 			if (!minterm.isUsed) {
 				minterm.isUsed = true;
-				primeImplicants.push_back(minterm);
+				primeImplicants.pushBack(minterm);
 			}
 		}
 	}
@@ -205,7 +206,7 @@ void QM<T, Alloc>::generateEssentialPrimeImplicant() {
 				if (find(primeImplicant.minterms.begin(), primeImplicant.minterms.end(), &minterm) != primeImplicant.minterms.end()) {
 					if (!primeImplicant.isUsed) {
 						primeImplicant.isUsed = true;
-						essentialImplicants.push_back(primeImplicant);
+						essentialImplicants.pushBack(primeImplicant);
 					}
 					break;
 				}
@@ -242,7 +243,7 @@ void QM<T, Alloc>::extractEssentialPrimeImplicant() {
 		}
 		if (!maxNumber)break;
 		newImplicant->isUsed = true;
-		essentialImplicants.push_back(*newImplicant);
+		essentialImplicants.pushBack(*newImplicant);
 	}
 }
 template <class T, class Alloc>
@@ -266,6 +267,6 @@ void QM<T, Alloc>::run() {
 	result();
 }
 int main() {
-	QM<int> qm;
+	QM<double> qm;
 	qm.run();
 }

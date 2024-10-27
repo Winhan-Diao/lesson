@@ -58,7 +58,7 @@ protected:
             // std::cout << "[debug] CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
             alloc.reallocate(data, volume);
         } else {
-            T *neoData = static_cast<T*>(a_t_t::allocate(alloc, volume));
+            T *neoData = reinterpret_cast<T*>(a_t_t::allocate(alloc, volume));
             if (data)
                 for (size_t i = 0; i < size; ++i)
                     assignThanConstruct<value_type&&, std::is_trivially_copyable_v<value_type>>(&neoData[i], std::move(data[i]));
@@ -70,7 +70,7 @@ protected:
         if (data) {
             if constexpr (!std::is_trivially_destructible_v<value_type>)
                 for (size_t i = 0; i < size; ++i) destroy(&data[i]);
-            a_t_t::deallocate(alloc, data, size);
+            a_t_t::deallocate (alloc, reinterpret_cast<T*>(data), size);
             data = nullptr;
         }
     }
