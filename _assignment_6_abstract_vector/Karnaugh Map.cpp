@@ -1,9 +1,8 @@
 ﻿
+#pragma once
 #include <iostream>
 #include <algorithm>
 #include "abstract_vector.hpp"
-
-#pragma once
 #include <cstring>
 #include <memory>
 #include <type_traits>
@@ -27,8 +26,8 @@ template <class T, class Alloc = std::allocator<T>>
 class Implicant:public CollectionVector<T,Alloc>
 {
 public:
-	std::unique_ptr<CollectionVector<Minterm<T, Alloc>, Alloc>*>minterms;//我们后续需要处理的对象
-	std::unique_ptr<CollectionVector<int>> binary;//仿造卡诺图，用二进制编码便于处理
+	CollectionVector<Minterm<T, Alloc>*, Alloc>minterms;//我们后续需要处理的对象
+	CollectionVector<int> binary;//仿造卡诺图，用二进制编码便于处理
 	bool isUsed;
 	Implicant() {
 		isUsed = false;
@@ -61,6 +60,7 @@ public:
 //}
 
 //化简过程，判断两个二进制编码间是否只有一项不同（两个“1”是否相邻）
+
 bool isDifferByOne(const CollectionVector<int>& binary1, const CollectionVector<int>& binary2) {
 	int count = 0;
 	for (int i = 0; i < binary1.getSize(); i++) {
@@ -75,11 +75,11 @@ template <class T, class Alloc = std::allocator<T>>
 class QM :public CollectionVector<T, Alloc>
 {
 public:
-	std::unique_ptr<CollectionVector<Minterm<T, Alloc>, Alloc>> minterms;
+	CollectionVector<Minterm<T, Alloc>, Alloc> minterms;
 	int digits = 0;
-	std::unique_ptr<CollectionVector<Implicant<T, Alloc>,Alloc>>primeImplicants;
-	std::unique_ptr<CollectionVector<Implicant<T, Alloc>,Alloc>>essentialImplicants;
-	std::unique_ptr<CollectionVector<CollectionVector<Implicant<T, Alloc>,Alloc>,Alloc>>columns;//存储分组结果
+	CollectionVector<Implicant<T, Alloc>,Alloc>primeImplicants;
+	CollectionVector<Implicant<T, Alloc>,Alloc>essentialImplicants;
+	CollectionVector<CollectionVector<Implicant<T, Alloc>,Alloc>,Alloc>columns;//存储分组结果
 	QM() = default;
 	void addData();
 	void initializeColumn();

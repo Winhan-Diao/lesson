@@ -47,17 +47,18 @@ protected:
     T *data;
     size_t size;
     size_t volume;
+
     virtual void expand(size_t requestedExtra = 0) {     // 一次性扩展向量1.5倍，而不是pushBack一个扩展一个
         if (requestedExtra) {
             volume += requestedExtra;
         } else {
-            volume = 1.5 * volume + 1;
+            volume = static_cast<size_t>(1.5 * volume) + 1;
         }
         if constexpr (std::is_same_v<allocator_type, CAllocAllocator<T>>) {
             // std::cout << "[debug] CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
             alloc.reallocate(data, volume);
         } else {
-            T *neoData = a_t_t::allocate(alloc, volume);
+            T *neoData = static_cast<T*>(a_t_t::allocate(alloc, volume));
             if (data)
                 for (size_t i = 0; i < size; ++i)
                     assignThanConstruct<value_type&&, std::is_trivially_copyable_v<value_type>>(&neoData[i], std::move(data[i]));
@@ -134,14 +135,14 @@ public:
         for (size_t i = 0; i < size; ++i)
             assignThanConstruct<const value_type&, std::is_trivially_copyable_v<value_type>>(&data[i], l.begin()[i]);
     }
-    AbstractVector(ssize_t size, const T& t): data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
+    AbstractVector(size_t size, const T& t): data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
         if constexpr (std::is_trivially_copyable_v<T>)
             std::fill(data, data + size, t);
         else
             for (size_t i = 0; i < size; ++i)
                 construct(data + i, t);
     }
-    AbstractVector(ssize_t size): data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
+    AbstractVector(size_t size): data(a_t_t::allocate(alloc, size)), size(size), volume(size) {
         if constexpr (!std::is_trivially_copyable_v<T>)
             for (size_t i = 0; i < size; ++i)
                 construct(data + i);
@@ -402,8 +403,8 @@ public:
     CollectionVector(const CollectionVector& v, size_t i): AbstractVector<T, Alloc>(v, i) {}
     // CollectionVector(CollectionVector&& v): AbstractVector<T, Alloc>(std::move(v)) {}
     CollectionVector(std::initializer_list<T> l): AbstractVector<T, Alloc>(l) {}
-    CollectionVector(ssize_t size, const T& t): AbstractVector<T, Alloc>(size, t) {}
-    CollectionVector(ssize_t size): AbstractVector<T, Alloc>(size) {}
+    CollectionVector(size_t size, const T& t): AbstractVector<T, Alloc>(size, t) {}
+    CollectionVector(size_t size): AbstractVector<T, Alloc>(size) {}
     // CollectionVector& operator=(const CollectionVector& v) { return reinterpret_cast<CollectionVector&>(AbstractVector<T, Alloc>::operator=(v)); }
     // CollectionVector& operator=(CollectionVector&& v) { return reinterpret_cast<CollectionVector&>(AbstractVector<T, Alloc>::operator=(std::move(v))); }
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& v) override { 
@@ -444,14 +445,14 @@ public:
         --ptr;
         return tmp;
     }
-    AbstractVectorIterator& operator+= (ssize_t n) {
+    AbstractVectorIterator& operator+= (size_t n) {
         ptr += n;
         return *this;
     }
-    AbstractVectorIterator& operator-= (ssize_t n) {
-        ptr -= n;
-        return *this;
-    }
+    //AbstractVectorIterator& operator-= (ssize_t n) {
+    //    ptr -= n;
+    //    return *this;
+    //}
     AbstractVectorIterator operator+(std::ptrdiff_t n) const { return AbstractVectorIterator(ptr + n); }
     AbstractVectorIterator operator-(std::ptrdiff_t n) const { return AbstractVectorIterator(ptr - n); }
     std::ptrdiff_t operator-(const AbstractVectorIterator& i) const { return std::ptrdiff_t(ptr - i.ptr); }
@@ -486,14 +487,14 @@ public:
         --this->ptr;
         return tmp;
     }
-    AbstractVectorReversedIterator& operator+= (ssize_t n) {
-        this->ptr -= n;
-        return *this;
-    }
-    AbstractVectorReversedIterator& operator-= (ssize_t n) {
-        this->ptr += n;
-        return *this;
-    }
+    //AbstractVectorReversedIterator& operator+= (ssize_t n) {
+    //    this->ptr -= n;
+    //    return *this;
+    //}
+    //AbstractVectorReversedIterator& operator-= (ssize_t n) {
+    //    this->ptr += n;
+    //    return *this;
+    //}
     std::ptrdiff_t operator-(const AbstractVectorReversedIterator& i) const { return std::ptrdiff_t(i.ptr - this->ptr); }
     AbstractVectorReversedIterator operator-(std::ptrdiff_t n) const { return AbstractVectorReversedIterator(this->ptr + n); }
     AbstractVectorReversedIterator operator+(std::ptrdiff_t n) const { return AbstractVectorReversedIterator(this->ptr - n); }
