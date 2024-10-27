@@ -13,53 +13,57 @@ class Matrix
 {
 //private:
 public:
-	int m=0;//¾ØÕóĞĞÊı£¨ĞĞÏòÁ¿¸öÊı£©
-	int n=0;//¾ØÕóÁĞÊı£¨ĞĞÏòÁ¿·ÖÁ¿¸öÊı£©
+	int m=0;//çŸ©é˜µè¡Œæ•°ï¼ˆè¡Œå‘é‡ä¸ªæ•°ï¼‰
+	int n=0;//çŸ©é˜µåˆ—æ•°ï¼ˆè¡Œå‘é‡åˆ†é‡ä¸ªæ•°ï¼‰
 	MathVector<T>* a= nullptr;
 public:
-	Matrix();//Ä¬ÈÏ¹¹Ôìº¯Êı
-	Matrix(const int& m, const int& n);//ÓĞ²Î¹¹Ôìº¯Êı
-	Matrix(const Matrix& copy);//¿½±´¹¹Ôìº¯Êı
+	Matrix();//é»˜è®¤æ„é€ å‡½æ•°
+	Matrix(const int& m, const int& n);//æœ‰å‚æ„é€ å‡½æ•°
+	Matrix(const Matrix& copy);//æ‹·è´æ„é€ å‡½æ•°
 	~Matrix(){
 		delete[] a;
 	}
 	MathVector<T>& operator[](int i)const{
 		return a[i];
 	}
-	Matrix operator+(const Matrix& b)const;//¾ØÕó¼Ó·¨£¨ÊµÏÖÁ¬¼Ó£©
-	Matrix operator-(const Matrix& b)const;//¾ØÕó¼õ·¨£¨ÊµÏÖÁ¬¼õ£©
-	Matrix operator-()const;//¸º¾ØÕó
-	Matrix operator*(const Matrix& b)const;//¾ØÕó³Ë·¨£¨ÊµÏÖÁ¬³Ë£©
+	Matrix operator+(const Matrix& b)const;//çŸ©é˜µåŠ æ³•ï¼ˆå®ç°è¿åŠ ï¼‰
+	Matrix operator-(const Matrix& b)const;//çŸ©é˜µå‡æ³•ï¼ˆå®ç°è¿å‡ï¼‰
+	Matrix operator-()const;//è´ŸçŸ©é˜µ
+	Matrix operator*(const Matrix& b)const;//çŸ©é˜µä¹˜æ³•ï¼ˆå®ç°è¿ä¹˜ï¼‰
 
-	void show_matrix()const;//Õ¹Ê¾¾ØÕó
-	bool judge_zero_matrix()const;//ÅĞ¶ÏÊÇ·ñÎªÁã¾ØÕó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ»Øfalse£©
-	bool judge_square_matrix()const;//ÅĞ¶ÏÊÇ·ñÎª·½Õó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ»Øfalse£©
-	T determinant(MathVector<T>* a, int n)const;//Çó·½Õó¶ÔÓ¦ĞĞÁĞÊ½µÄÖµ
-	void adjugate_matrix(MathVector<T>* a, Matrix<T>& adjugate_matrix_ptr, int n);//Çó°éËæ¾ØÕó,½öÔÚÇó¾ØÕóµÄÄæ¾ØÕóÊ±±»µ÷ÓÃ
-	Matrix<double> inverse_matrix();//Çó¾ØÕóµÄÄæ¾ØÕó
+	void show_matrix()const;//å±•ç¤ºçŸ©é˜µ
+	bool judge_zero_matrix()const;//åˆ¤æ–­æ˜¯å¦ä¸ºé›¶çŸ©é˜µï¼ˆæ˜¯ï¼Œè¿”å›trueï¼›å¦ï¼Œè¿”å›falseï¼‰
+	bool judge_square_matrix()const;//åˆ¤æ–­æ˜¯å¦ä¸ºæ–¹é˜µï¼ˆæ˜¯ï¼Œè¿”å›trueï¼›å¦ï¼Œè¿”å›falseï¼‰
+	T determinant(MathVector<T>* a, int n)const;//æ±‚æ–¹é˜µå¯¹åº”è¡Œåˆ—å¼çš„å€¼
+	void adjugate_matrix(MathVector<T>* a, Matrix<T>& adjugate_matrix_ptr, int n);//æ±‚ä¼´éšçŸ©é˜µ,ä»…åœ¨æ±‚çŸ©é˜µçš„é€†çŸ©é˜µæ—¶è¢«è°ƒç”¨
+	Matrix<double> inverse_matrix();//æ±‚çŸ©é˜µçš„é€†çŸ©é˜µ,æ’ä¸ºdoubleç±»å‹
 };
-template<class T> std::ostream& operator<<(std::ostream& out, const Matrix<T>& b);//ÔËËã·û<<ÖØÔØ
+template<class T> std::ostream& operator<<(std::ostream& out, const Matrix<T>& b);//è¿ç®—ç¬¦<<é‡è½½
 
 template<class T>
-Matrix<T>::Matrix()//Ä¬ÈÏ¹¹Ôìº¯Êı
+Matrix<T>::Matrix()//é»˜è®¤æ„é€ å‡½æ•°
 {
 	m = 0;
 	n = 0;
 }
 
 template<class T>
-Matrix<T>::Matrix(const int& r, const int& c):m(r),n(c)//ÓĞ²Î¹¹Ôìº¯Êı
+Matrix<T>::Matrix(const int& r, const int& c):m(r),n(c)//æœ‰å‚æ„é€ å‡½æ•°
 {
 	a=new MathVector<T>[r];
 	for(int i=0;i<r;i++) a[i].resize(c);
 }
 
 template<class T>
-Matrix<T>::Matrix(const Matrix<T>& copy)//¿½±´¹¹Ôìº¯Êı
+Matrix<T>::Matrix(const Matrix<T>& copy)//æ‹·è´æ„é€ å‡½æ•°
 {
 	this->m = copy.m;
 	this->n = copy.n;
 	this->a =new MathVector<T>[this->m];
+	for (int i = 0; i < m; i++)
+	{
+		a[i].resize(n);
+	}
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -70,7 +74,7 @@ Matrix<T>::Matrix(const Matrix<T>& copy)//¿½±´¹¹Ôìº¯Êı
 }
 
 template<class T>
-Matrix<T> Matrix<T>::operator+(const Matrix<T>& b)const//¾ØÕó¼Ó·¨£¨ÊµÏÖÁ¬¼Ó£©
+Matrix<T> Matrix<T>::operator+(const Matrix<T>& b)const//çŸ©é˜µåŠ æ³•ï¼ˆå®ç°è¿åŠ ï¼‰
 {
 	if (this->judge_zero_matrix())
 	{
@@ -93,11 +97,11 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T>& b)const//¾ØÕó¼Ó·¨£¨ÊµÏÖÁ¬¼Ó£©
 }
 
 template<class T>
-Matrix<T> Matrix<T>::operator-(const Matrix<T>& b)const//¾ØÕó¼õ·¨£¨ÊµÏÖÁ¬¼õ£©
+Matrix<T> Matrix<T>::operator-(const Matrix<T>& b)const//çŸ©é˜µå‡æ³•ï¼ˆå®ç°è¿å‡ï¼‰
 {
 	if (this->judge_zero_matrix())
 	{
-		return -b;//µ÷ÓÃoperator-µÄÖØÔØº¯Êı
+		return -b;//è°ƒç”¨operator-çš„é‡è½½å‡½æ•°
 	}
 	else if (b.judge_zero_matrix())
 	{
@@ -116,7 +120,7 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T>& b)const//¾ØÕó¼õ·¨£¨ÊµÏÖÁ¬¼õ£©
 }
 
 template<class T>
-Matrix<T> Matrix<T>::operator-()const//¸º¾ØÕó
+Matrix<T> Matrix<T>::operator-()const//è´ŸçŸ©é˜µ
 {
 	for (int i = 0; i < m; i++)
 		for (int j = 0; j < n; j++)
@@ -127,7 +131,7 @@ Matrix<T> Matrix<T>::operator-()const//¸º¾ØÕó
 }
 
 template<class T>
-Matrix<T> Matrix<T>::operator*(const Matrix& b)const//¾ØÕó³Ë·¨£¨ÊµÏÖÁ¬³Ë£©
+Matrix<T> Matrix<T>::operator*(const Matrix& b)const//çŸ©é˜µä¹˜æ³•ï¼ˆå®ç°è¿ä¹˜ï¼‰
 {
 	if (this->judge_zero_matrix())
 	{
@@ -160,14 +164,14 @@ Matrix<T> Matrix<T>::operator*(const Matrix& b)const//¾ØÕó³Ë·¨£¨ÊµÏÖÁ¬³Ë£©
 }
 
 template<class T>
-std::ostream& operator<<(std::ostream& out, const Matrix<T>& b)//ÔËËã·û<<ÖØÔØ
+std::ostream& operator<<(std::ostream& out, const Matrix<T>& b)//è¿ç®—ç¬¦<<é‡è½½
 {
 	b.show_matrix();
 	return out;
 }
 
 template<class T>
-void Matrix<T>::show_matrix()const//Õ¹Ê¾¾ØÕó
+void Matrix<T>::show_matrix()const//å±•ç¤ºçŸ©é˜µ
 {
 	if (m == 0 || n == 0)
 	{
@@ -188,7 +192,7 @@ void Matrix<T>::show_matrix()const//Õ¹Ê¾¾ØÕó
 }
 
 template<class T>
-bool Matrix<T>::judge_zero_matrix()const//ÅĞ¶ÏÊÇ·ñÎªÁã¾ØÕó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ»Øfalse£©
+bool Matrix<T>::judge_zero_matrix()const//åˆ¤æ–­æ˜¯å¦ä¸ºé›¶çŸ©é˜µï¼ˆæ˜¯ï¼Œè¿”å›trueï¼›å¦ï¼Œè¿”å›falseï¼‰
 {
 	if (this->m == 0 || this->n == 0)
 		return true;
@@ -197,7 +201,7 @@ bool Matrix<T>::judge_zero_matrix()const//ÅĞ¶ÏÊÇ·ñÎªÁã¾ØÕó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ
 }
 
 template<class T>
-bool Matrix<T>::judge_square_matrix()const//ÅĞ¶ÏÊÇ·ñÎª·½Õó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ»Øfalse£©
+bool Matrix<T>::judge_square_matrix()const//åˆ¤æ–­æ˜¯å¦ä¸ºæ–¹é˜µï¼ˆæ˜¯ï¼Œè¿”å›trueï¼›å¦ï¼Œè¿”å›falseï¼‰
 {
 	if (this->m == this->n)
 		return true;
@@ -206,13 +210,13 @@ bool Matrix<T>::judge_square_matrix()const//ÅĞ¶ÏÊÇ·ñÎª·½Õó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ
 }
 
 template<class T>
-T Matrix<T>::determinant(MathVector<T>* a, int n)const//Çó·½Õó¶ÔÓ¦ĞĞÁĞÊ½µÄÖµ
+T Matrix<T>::determinant(MathVector<T>* a, int n)const//æ±‚æ–¹é˜µå¯¹åº”è¡Œåˆ—å¼çš„å€¼
 {
 	if (n == 1)
 	{
 		return a[0][0];
 	}
-	else if (n == 2)//µİ¹éÖÕµã£¨Èôn>=3£©
+	else if (n == 2)//é€’å½’ç»ˆç‚¹ï¼ˆè‹¥n>=3ï¼‰
 	{
 		return a[0][0] * a[1][1] - a[0][1] * a[1][0];
 	}
@@ -221,23 +225,23 @@ T Matrix<T>::determinant(MathVector<T>* a, int n)const//Çó·½Õó¶ÔÓ¦ĞĞÁĞÊ½µÄÖµ
 		T matrix_ptr_value = 0;
 		for (int k = 0; k < n; k++)
 		{
-			MathVector<T>* matrix_ptr_temp = new MathVector<T>[n - 1];//ĞĞÁĞÊ½Ã¿Ò»ĞĞµÚÒ»¸öÔªËØ£¬¹¹³ÉÒ»¸öÁĞÏòÁ¿
-			int i2 = 1;//¸ù¾İµÚ0ĞĞµÚjÁĞÕ¹¿ª£¬Ô­±¾µÄĞĞÁĞÊ½Ö±½Ó´ÓµÚÒ»ĞĞ¿ªÊ¼¿½±´
-			for (int i1 = 0; i1 < n - 1; i1++)//ĞÂ´´½¨Ò»¸ö¶¯Ì¬¶şÎ¬Êı×é£¬ÓÃÓÚ´æ´¢£¬ÉÏÒ»´Î¾ØÕó³ıÈ¥Ò»ĞĞÒ»ÁĞÔªËØºó£¬µÄËùÓĞÊı¾İ
+			MathVector<T>* matrix_ptr_temp = new MathVector<T>[n - 1];//è¡Œåˆ—å¼æ¯ä¸€è¡Œç¬¬ä¸€ä¸ªå…ƒç´ ï¼Œæ„æˆä¸€ä¸ªåˆ—å‘é‡
+			int i2 = 1;//æ ¹æ®ç¬¬0è¡Œç¬¬jåˆ—å±•å¼€ï¼ŒåŸæœ¬çš„è¡Œåˆ—å¼ç›´æ¥ä»ç¬¬ä¸€è¡Œå¼€å§‹æ‹·è´
+			for (int i1 = 0; i1 < n - 1; i1++)//æ–°åˆ›å»ºä¸€ä¸ªåŠ¨æ€äºŒç»´æ•°ç»„ï¼Œç”¨äºå­˜å‚¨ï¼Œä¸Šä¸€æ¬¡çŸ©é˜µé™¤å»ä¸€è¡Œä¸€åˆ—å…ƒç´ åï¼Œçš„æ‰€æœ‰æ•°æ®
 			{
-				matrix_ptr_temp[i1] .resize(n-1) ;//ĞĞÁĞÊ½µÚÒ»ĞĞ
+				matrix_ptr_temp[i1] .resize(n-1) ;//è¡Œåˆ—å¼ç¬¬ä¸€è¡Œ
 				int j2 = 0;
 				for (int j1 = 0; j1 < n - 1; j1++)
 				{
 					if (j2 == k)
 					{
 						j2++;
-					}//È¥³ıµÚjÁĞ
-					matrix_ptr_temp[i1][j1] = a[i2][j2++];//¸³Öµ¸øĞÂµÄ¶şÎ¬Êı×é
+					}//å»é™¤ç¬¬jåˆ—
+					matrix_ptr_temp[i1][j1] = a[i2][j2++];//èµ‹å€¼ç»™æ–°çš„äºŒç»´æ•°ç»„
 				}
 				i2++;
 			}
-			matrix_ptr_value += ((k & 0x0001) ? (-1) : 1) * a[0][k] * determinant(matrix_ptr_temp, n - 1);//¼ÆËã´úÊıÓà×ÓÊ½Óë¶ÔÓ¦ÏîµÄ³Ë»ı,²¢½øĞĞº¯Êıµü´ú
+			matrix_ptr_value += ((k & 0x0001) ? (-1) : 1) * a[0][k] * determinant(matrix_ptr_temp, n - 1);//è®¡ç®—ä»£æ•°ä½™å­å¼ä¸å¯¹åº”é¡¹çš„ä¹˜ç§¯,å¹¶è¿›è¡Œå‡½æ•°è¿­ä»£
 			delete[] matrix_ptr_temp;
 		}
 		return matrix_ptr_value;
@@ -245,9 +249,9 @@ T Matrix<T>::determinant(MathVector<T>* a, int n)const//Çó·½Õó¶ÔÓ¦ĞĞÁĞÊ½µÄÖµ
 }
 
 template<class T>
-void Matrix<T>::adjugate_matrix(MathVector<T>* a, Matrix<T>& adjugate_matrix_ptr, int n)//Çó°éËæ¾ØÕó
+void Matrix<T>::adjugate_matrix(MathVector<T>* a, Matrix<T>& adjugate_matrix_ptr, int n)//æ±‚ä¼´éšçŸ©é˜µ
 {
-	Matrix<T> matrix_for_algebraic_cofactor(n-1,n-1); //ÔİÊ±´æ·Å´úÊıÓà×ÓÊ½µÄ¾ØÕó
+	Matrix<T> matrix_for_algebraic_cofactor(n-1,n-1); //æš‚æ—¶å­˜æ”¾ä»£æ•°ä½™å­å¼çš„çŸ©é˜µ
 	for (int x = 0; x < n; x++)
 	{
 		for (int y = 0; y < n; y++)
@@ -269,7 +273,7 @@ void Matrix<T>::adjugate_matrix(MathVector<T>* a, Matrix<T>& adjugate_matrix_ptr
 					matrix_for_algebraic_cofactor[i][j] = a[i1][j1++];
 				}
 				i1++;
-			}//ÊµÏÖÁË×ªÖÃ
+			}//å®ç°äº†è½¬ç½®
 			adjugate_matrix_ptr[y][x] = ((x + y) & 0x0001 ? (-1) : 1) * determinant(matrix_for_algebraic_cofactor.a, n - 1);
 		}
 	}
