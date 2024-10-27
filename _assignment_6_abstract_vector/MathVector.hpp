@@ -82,7 +82,7 @@ public:
 		}
 		return *this+c;
 	}//加法带异常检查，抛出异常
-	MathVector<T, Alloc>& operator-=(const MathVector<T, Alloc>& c){
+	MathVector<T, Alloc>& operator-=(const MathVector<T, Alloc>& c)noexcept{
 		if(c.getSize()==0){
 			return *this;
 		}

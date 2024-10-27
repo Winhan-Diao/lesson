@@ -20,6 +20,12 @@ public:
 	Matrix();//默认构造函数
 	Matrix(const int& m, const int& n);//有参构造函数
 	Matrix(const Matrix& copy);//拷贝构造函数
+	Matrix(const MathVector<T>& vec){//特殊拷贝构造
+		m=1;
+		n=vec.getSize();
+		a=new MathVector<T>[1];
+		a[0]=vec;
+	}
 	~Matrix(){
 		delete[] a;
 	}
