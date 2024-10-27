@@ -3,6 +3,7 @@
 #include<vector>
 #include"MathVector.hpp"
 #include"color_control.hpp"
+#include"mat.hpp"
 using std::cin;
 using std::cout;
 using std::endl;
@@ -14,7 +15,10 @@ void constructors_test();
 void calc_test();
 int main(){
 	// freopen("s.txt","w",stdout);
-	test();
+	Mat<int> a(3, 4);
+	a.show();
+	system("pause");
+	// test();
 	return 0;
 }
 

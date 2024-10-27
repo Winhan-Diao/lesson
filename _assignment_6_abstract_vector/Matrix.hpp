@@ -205,7 +205,7 @@ Matrix<T> Matrix<T>::operator*(const Matrix& b)const//矩阵乘法（实现连乘）
 }
 
 template<class T>
-std::ostream& operator<<(std::ostream& out, const typename Matrix<T>& b)//运算符<<重载
+std::ostream& operator<<(std::ostream& out, const Matrix<T>& b)//运算符<<重载
 {
 	b.show_matrix();
 	return out;
