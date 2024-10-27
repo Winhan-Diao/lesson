@@ -18,7 +18,7 @@ int main(){
 	Mat<int> a(3, 4);
 	a.show();
 	system("pause");
-	// test();
+	test();
 	return 0;
 }
 

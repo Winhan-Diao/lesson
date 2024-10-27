@@ -9,7 +9,7 @@
 #include <cmath>
 #include "c_alloc_allocator.hpp"
 using namespace std;
-template <class T, class Alloc = std::allocator<T>>
+template <class T, class Alloc = std::allocator<T>, typename = std::enable_if_t<std::is_arithmetic_v<T>> >
 //第一步建立一个最小项类
 class Minterm:public CollectionVector<T, Alloc>
 {
@@ -22,7 +22,7 @@ public:
 	}
 };
 //第二步建立一个质蕴涵项类
-template <class T, class Alloc = std::allocator<T>>
+template <class T, class Alloc = std::allocator<T>,typename = std::enable_if_t<std::is_arithmetic_v<T>> >
 class Implicant:public CollectionVector<T,Alloc>
 {
 public:
@@ -71,7 +71,7 @@ bool isDifferByOne(const CollectionVector<T, Alloc>& binary1, const CollectionVe
 	return count == 1;
 }
 //QM算法实现
-template <class T, class Alloc = std::allocator<T>>
+template <class T, class Alloc = std::allocator<T>,typename = std::enable_if_t<std::is_arithmetic_v<T>> >
 class QM :public CollectionVector<T, Alloc>
 {
 public:
@@ -118,7 +118,7 @@ public:
 //	}
 //	return binary;
 //}
-template <class T, class Alloc>
+template <class T, class Alloc,typename = std::enable_if_t<std::is_arithmetic_v<T>> >
 void QM<T, Alloc>::addData(){
 	cout << "请输入逻辑函数的变量数：" << endl;
 	cin >> digits;
@@ -133,7 +133,7 @@ void QM<T, Alloc>::addData(){
 	}
 }
 //使用迭代器遍历每一个最小项,以二进制编码形式存入column中，初始化column第一列
-template <class T, class Alloc>
+template <class T, class Alloc,typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 void QM<T,Alloc>::initializeColumn() {
 	for (auto& minterm : minterms) {
 		Implicant newImplicant;
