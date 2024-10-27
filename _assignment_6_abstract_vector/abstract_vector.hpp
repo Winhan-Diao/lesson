@@ -58,7 +58,7 @@ protected:
             // std::cout << "[debug] CAllocAllocator 'Specified' Implementation of AbstractVector::expand" << "\r\n";       //debug
             alloc.reallocate(data, volume);
         } else {
-            T *neoData = a_t_t::allocate(alloc, volume);
+            T *neoData = reinterpret_cast<T*>(a_t_t::allocate(alloc, volume));
             if (data)
                 for (size_t i = 0; i < size; ++i)
                     assignThanConstruct<value_type&&, std::is_trivially_copyable_v<value_type>>(&neoData[i], std::move(data[i]));
@@ -70,7 +70,7 @@ protected:
         if (data) {
             if constexpr (!std::is_trivially_destructible_v<value_type>)
                 for (size_t i = 0; i < size; ++i) destroy(&data[i]);
-            a_t_t::deallocate (alloc, data, size);
+            a_t_t::deallocate (alloc, reinterpret_cast<T*>(data), size);
             data = nullptr;
         }
     }
@@ -409,6 +409,30 @@ public:
     // CollectionVector& operator=(CollectionVector&& v) { return reinterpret_cast<CollectionVector&>(AbstractVector<T, Alloc>::operator=(std::move(v))); }
     AbstractVector<T, Alloc>& operator+=(const AbstractVector<T, Alloc>& v) override { 
         return *this << v;
+    }
+    bool operator==(const CollectionVector<T, Alloc>& other) const {
+        if (this->size != other.size) return false;
+        for (size_t i = 0; i < this->size; ++i) {
+            if (this->data[i] != other.data[i]) return false;
+        }
+        return true;
+    }
+    void resize(size_t newSize, const T& defaultValue = T()) {
+        if (newSize > this->size) {
+            // 如果新大小大于当前大小，扩展容器
+            this->expand(newSize - this->size); // 调用expand来分配更多空间
+            for (size_t i = this->size; i < newSize; ++i) {
+                this->construct(this->data + i, defaultValue);
+            }
+            this->size = newSize;
+        }
+        else if (newSize < this->size) {
+            // 如果新大小小于当前大小，收缩容器
+            for (size_t i = newSize; i < this->size; ++i) {
+                this->destroy(this->data + i);
+            }
+            this->size = newSize;
+        }
     }
     ~CollectionVector() noexcept override = default;
 };
