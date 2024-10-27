@@ -33,10 +33,10 @@ public:
 		isUsed = false;
 	}
 	void print() const {
-		for (size_t i = 0; i < binary.getsize(); i++) {
+		for (size_t i = 0; i < binary.getSize(); i++) {
 			if (binary[i] == 0) cout << char('A' + i) << "'"; // A'代表A反
 			else if (binary[i] == 1) cout << char('A' + i);
-			if (i < binary.getsize() - 1) cout << "+"; // 避免最后一个元素后输出 "+"
+			if (i < binary.getSize() - 1) cout << "+"; // 避免最后一个元素后输出 "+"
 		}
 		cout << endl; // 输出完后换行
 	}

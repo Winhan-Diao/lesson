@@ -3,7 +3,7 @@
 #include<vector>
 #include"MathVector.hpp"
 #include"color_control.hpp"
-#include"mat.hpp"
+#include"Matrix.hpp"
 using std::cin;
 using std::cout;
 using std::endl;
@@ -15,8 +15,15 @@ void constructors_test();
 void calc_test();
 int main(){
 	// freopen("s.txt","w",stdout);
-	Mat<int> a(3, 4);
-	a.show();
+	Matrix<int> a(3, 3),b;
+	for(int i=0;i<3;i++){
+		for(int j=0;j<3;j++){
+			if(i==j) a[i][j]=i+1;
+		}
+	}
+	a.show_matrix();
+	cout<<a.determinant(a.a,3)<<endl;
+	cout<<a.inverse_matrix()<<endl;
 	system("pause");
 	test();
 	return 0;
