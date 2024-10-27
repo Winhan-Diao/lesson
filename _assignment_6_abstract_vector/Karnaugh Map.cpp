@@ -81,17 +81,139 @@ public:
 	CollectionVector<Implicant<T, Alloc>,Alloc>essentialImplicants;
 	CollectionVector<CollectionVector<Implicant<T, Alloc>,Alloc>,Alloc>columns;//存储分组结果
 	QM() :CollectionVector<T, Alloc>(){};
-	void addData();
-	void initializeColumn();
-	void simplifyColumns();
-	bool isInColumns(const CollectionVector<Implicant<T,Alloc>>& column, const Implicant<T, Alloc>& Implicant);
-	void generatePrimeImplicant();
-	bool isCoverdJustOnce(const Minterm<T,Alloc>& minterm);
-	void generateEssentialPrimeImplicant();
-	void removeCoverdMinterms();
-	void extractEssentialPrimeImplicant();
-	void result();
-	void run();
+	void addData() {
+		cout << "请输入逻辑函数的变量数：" << endl;
+		cin >> digits;
+		columns.resize(digits + 1);//还有全是0的一列
+		cout << "请输入逻辑函数的最小项（以-1结尾）：" << endl;
+		int mintermsData = 0;
+		while (cin >> mintermsData) {
+			if (mintermsData == -1)break;
+			Minterm newMinterms;
+			newMinterms.data = mintermsData;
+			minterms.pushBack(newMinterms);
+		}
+	};
+	void initializeColumn() {
+		for (auto& minterm : minterms) {
+			Implicant newImplicant;
+			newImplicant.minterms.pushBack(&minterm);
+			newImplicant.binary = getBinary(minterm.data, digits);
+			columns[0].pushBack(newImplicant);
+		}
+	};
+	void simplifyColumns() {
+		for (int i = 0; i < digits; i++) {
+			for (int j = 0; j < columns[i].getsize(); j++) {
+				for (int k = j + 1; k < columns[i].getsize(); k++) {
+					Implicant<T, Alloc>& lastImplicant1 = columns[i][j];
+					Implicant<T, Alloc>& lastImplicant2 = columns[i][k];
+					if (isDifferByOne(lastImplicant1.binary, lastImplicant2.binary)) {
+						lastImplicant1.isUsed = true;
+						lastImplicant2.isUsed = true;
+						Implicant newImpliant;
+						newImpliant.binary = lastImplicant1.binary;
+						for (int i = 0; i < newImpliant.binary.getsize(); i++) {
+							if (newImpliant.binary[i] != lastImplicant2.binary[i]) {
+								newImpliant.binary[i] = -1;
+								break;
+							}
+						}
+						newImpliant.minterms.insert(newImpliant.minterms.begin(), lastImplicant1.minterms.begin(), lastImplicant1.minterms.end());
+						newImpliant.minterms.insert(newImpliant.minterms.begin(), lastImplicant1.minterms.begin(), lastImplicant1.minterms.end());
+						if (!isInColumns(columns[i + 1], newImpliant)) columns[i + 1].pushBack(newImpliant);
+					}
+				}
+			}
+		}
+	};
+	bool isInColumns(const CollectionVector<Implicant<T, Alloc>>& column, const Implicant<T, Alloc>& Implicant) {
+		for (auto& primeImplicant : column) {
+			if (primeImplicant.binary == Implicant.binary)return true;
+		}
+		return false;
+	};
+	void generatePrimeImplicant() {
+		for (auto& column : columns) {
+			for (auto& minterm : column) {
+				if (!minterm.isUsed) {
+					minterm.isUsed = true;
+					primeImplicants.pushBack(minterm);
+				}
+			}
+		}
+	};
+	bool isCoverdJustOnce(const Minterm<T, Alloc>& minterm) {
+		int count = 0;
+		for (auto& primeImplicant : primeImplicants) {
+			//判断每个最小项是否只被圈过一次，如果是，那就只有两种情况，单个“1”或是单个圈，用于后续找到必要质蕴涵项
+			if (find(primeImplicant.minterms.begin(), primeImplicant.minterms.end(), &minterm) != primeImplicant.minterms.end())count++;
+		}
+		return count == 1;
+	};
+	void generateEssentialPrimeImplicant() {
+		for (auto& minterm : minterms) {
+			if (isCoverdJustOnce(minterm)) {
+				for (auto& primeImplicant : primeImplicants) {
+					if (find(primeImplicant.minterms.begin(), primeImplicant.minterms.end(), &minterm) != primeImplicant.minterms.end()) {
+						if (!primeImplicant.isUsed) {
+							primeImplicant.isUsed = true;
+							essentialImplicants.pushBack(primeImplicant);
+						}
+						break;
+					}
+				}
+			}
+		}
+	};
+	void removeCoverdMinterms() {
+		for (auto& essentialImplicant : essentialImplicants) {
+			for (auto& minterm : essentialImplicant.minterms) {
+				minterm->isCoverd = true;
+			}
+		}
+	};
+	void extractEssentialPrimeImplicant() {
+		generateEssentialPrimeImplicant();
+		while (true) {
+			removeCoverdMinterms();
+			int maxNumber = 0;
+			Implicant* newImplicant = nullptr;
+			for (auto& primeImplicant : primeImplicants) {
+				if (!primeImplicant.isUsed) {
+					int minNumber = 0;
+					for (auto& minterm : primeImplicant.minterms) {
+						if (!minterm->isCoverd) minNumber++;
+					}
+					if (minNumber > maxNumber) {
+						maxNumber = minNumber;
+						newImplicant = &primeImplicant;
+					}
+				}
+			}
+			if (!maxNumber)break;
+			newImplicant->isUsed = true;
+			essentialImplicants.pushBack(*newImplicant);
+		}
+	};
+	void result() {
+		cout << "初化简结果为：" << endl;
+		for (auto& primeImplicant : primeImplicants) {
+			primeImplicant.print();
+		}
+		cout << "最终化简结果为：" << endl;
+		for (auto& essentialImplicant : essentialImplicants) {
+			essentialImplicant.print();
+		}
+	};
+	void run() {
+		addData();
+		initializeColumn();
+		simplifyColumns();
+		generatePrimeImplicant();
+		extractEssentialPrimeImplicant();
+		result();
+	};
 	CollectionVector <T, Alloc> getbinary(int minterm, int digits) {
 		CollectionVector<T, Alloc>binary;
 		for (int i = digits; i > 0; i--) {
@@ -118,154 +240,154 @@ public:
 //	}
 //	return binary;
 //}
-template <class T, class Alloc,typename = std::enable_if_t<std::is_arithmetic_v<T>> >
-void QM<T, Alloc>::addData(){
-	cout << "请输入逻辑函数的变量数：" << endl;
-	cin >> digits;
-	columns.resize(digits + 1);//还有全是0的一列
-	cout << "请输入逻辑函数的最小项（以-1结尾）：" << endl;
-	int mintermsData = 0;
-	while (cin >> mintermsData) {
-		if (mintermsData == -1)break;
-		Minterm newMinterms;
-		newMinterms.data = mintermsData;
-		minterms.pushBack(newMinterms);
-	}
-}
+//template <class T, class Alloc,typename = std::enable_if_t<std::is_arithmetic_v<T>> >
+//void QM<T, Alloc>::addData(){
+//	cout << "请输入逻辑函数的变量数：" << endl;
+//	cin >> digits;
+//	columns.resize(digits + 1);//还有全是0的一列
+//	cout << "请输入逻辑函数的最小项（以-1结尾）：" << endl;
+//	int mintermsData = 0;
+//	while (cin >> mintermsData) {
+//		if (mintermsData == -1)break;
+//		Minterm newMinterms;
+//		newMinterms.data = mintermsData;
+//		minterms.pushBack(newMinterms);
+//	}
+//}
 //使用迭代器遍历每一个最小项,以二进制编码形式存入column中，初始化column第一列
-template <class T, class Alloc,typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-void QM<T,Alloc>::initializeColumn() {
-	for (auto& minterm : minterms) {
-		Implicant newImplicant;
-		newImplicant.minterms.pushBack(&minterm);
-		newImplicant.binary = getBinary(minterm.data, digits);
-		columns[0].pushBack(newImplicant);
-	}
-}
+//template <class T, class Alloc,typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+//void QM<T,Alloc>::initializeColumn() {
+//	for (auto& minterm : minterms) {
+//		Implicant newImplicant;
+//		newImplicant.minterms.pushBack(&minterm);
+//		newImplicant.binary = getBinary(minterm.data, digits);
+//		columns[0].pushBack(newImplicant);
+//	}
+//}
 //判断化简后的结果是否已经存在于columns中
-template <class T, class Alloc>
-bool QM<T,Alloc>::isInColumns(const CollectionVector<Implicant<T, Alloc>>& column, const Implicant<T, Alloc>& Implicant) {
-	for (auto& primeImplicant : column) {
-		if (primeImplicant.binary == Implicant.binary)return true;
-	}
-	return false;
-}
+//template <class T, class Alloc>
+//bool QM<T,Alloc>::isInColumns(const CollectionVector<Implicant<T, Alloc>>& column, const Implicant<T, Alloc>& Implicant) {
+//	for (auto& primeImplicant : column) {
+//		if (primeImplicant.binary == Implicant.binary)return true;
+//	}
+//	return false;
+//}
 //卡诺圈式化简
 
-template <class T, class Alloc>
-void QM<T, Alloc>::simplifyColumns() {
-	for (int i = 0; i < digits; i++) {
-		for (int j = 0; j < columns[i].getsize(); j++) {
-			for (int k = j + 1; k < columns[i].getsize(); k++) {
-				Implicant<T, Alloc>& lastImplicant1 = columns[i][j];
-				Implicant<T, Alloc>& lastImplicant2 = columns[i][k];
-				if (isDifferByOne(lastImplicant1.binary, lastImplicant2.binary)) {
-					lastImplicant1.isUsed = true;
-					lastImplicant2.isUsed = true;
-					Implicant newImpliant;
-					newImpliant.binary = lastImplicant1.binary;
-					for (int i = 0; i < newImpliant.binary.getsize(); i++) {
-						if (newImpliant.binary[i] != lastImplicant2.binary[i]) {
-							newImpliant.binary[i] = -1;
-							break;
-						}
-					}
-					newImpliant.minterms.insert(newImpliant.minterms.begin(), lastImplicant1.minterms.begin(), lastImplicant1.minterms.end());
-					newImpliant.minterms.insert(newImpliant.minterms.begin(), lastImplicant1.minterms.begin(), lastImplicant1.minterms.end());
-					if (!isInColumns(columns[i + 1], newImpliant)) columns[i + 1].pushBack(newImpliant);
-				}
-			}
-		}
-	}
-}
-template <class T, class Alloc>
-void QM<T,Alloc>::generatePrimeImplicant() {
-	for (auto& column : columns) {
-		for (auto& minterm : column) {
-			if (!minterm.isUsed) {
-				minterm.isUsed = true;
-				primeImplicants.pushBack(minterm);
-			}
-		}
-	}
-}
-template <class T, class Alloc>
-bool QM<T,Alloc>::isCoverdJustOnce(const Minterm<T,Alloc>& minterm) {
-	int count = 0;
-	for (auto& primeImplicant : primeImplicants) {
-		//判断每个最小项是否只被圈过一次，如果是，那就只有两种情况，单个“1”或是单个圈，用于后续找到必要质蕴涵项
-		if (find(primeImplicant.minterms.begin(), primeImplicant.minterms.end(), &minterm) != primeImplicant.minterms.end())count++;
-	}
-	return count==1;
-}
-template <class T, class Alloc>
-void QM<T, Alloc>::generateEssentialPrimeImplicant() {
-	for (auto& minterm : minterms) {
-		if (isCoverdJustOnce(minterm)) {
-			for (auto& primeImplicant : primeImplicants) {
-				if (find(primeImplicant.minterms.begin(), primeImplicant.minterms.end(), &minterm) != primeImplicant.minterms.end()) {
-					if (!primeImplicant.isUsed) {
-						primeImplicant.isUsed = true;
-						essentialImplicants.pushBack(primeImplicant);
-					}
-					break;
-				}
-			}
-		}
-	}
-}
-template <class T, class Alloc>
-void QM<T, Alloc>::removeCoverdMinterms() {
-	for (auto& essentialImplicant : essentialImplicants) {
-		for (auto& minterm : essentialImplicant.minterms) {
-			minterm->isCoverd = true;
-		}
-	}
-}
-template <class T, class Alloc>
-void QM<T, Alloc>::extractEssentialPrimeImplicant() {
-	generateEssentialPrimeImplicant();
-	while (true) {
-		removeCoverdMinterms();
-		int maxNumber = 0;
-		Implicant* newImplicant = nullptr;
-		for (auto& primeImplicant : primeImplicants) {
-			if (!primeImplicant.isUsed) {
-				int minNumber = 0;
-				for (auto& minterm : primeImplicant.minterms) {
-					if (!minterm->isCoverd) minNumber++;
-				}
-				if (minNumber > maxNumber){
-					maxNumber=minNumber;
-					newImplicant = &primeImplicant;
-					}
-			}
-		}
-		if (!maxNumber)break;
-		newImplicant->isUsed = true;
-		essentialImplicants.pushBack(*newImplicant);
-	}
-}
-template <class T, class Alloc>
-void QM<T, Alloc>::result() {
-	cout << "初化简结果为：" << endl;
-	for (auto& primeImplicant : primeImplicants) {
-		primeImplicant.print();
-	}
-	cout << "最终化简结果为：" << endl;
-	for (auto& essentialImplicant : essentialImplicants) {
-		essentialImplicant.print();
-	}
-}
-template <class T, class Alloc>
-void QM<T, Alloc>::run() {
-	addData();
-	initializeColumn();
-	simplifyColumns();
-	generatePrimeImplicant();
-	extractEssentialPrimeImplicant();
-	result();
-}
+//template <class T, class Alloc>
+//void QM<T, Alloc>::simplifyColumns() {
+//	for (int i = 0; i < digits; i++) {
+//		for (int j = 0; j < columns[i].getsize(); j++) {
+//			for (int k = j + 1; k < columns[i].getsize(); k++) {
+//				Implicant<T, Alloc>& lastImplicant1 = columns[i][j];
+//				Implicant<T, Alloc>& lastImplicant2 = columns[i][k];
+//				if (isDifferByOne(lastImplicant1.binary, lastImplicant2.binary)) {
+//					lastImplicant1.isUsed = true;
+//					lastImplicant2.isUsed = true;
+//					Implicant newImpliant;
+//					newImpliant.binary = lastImplicant1.binary;
+//					for (int i = 0; i < newImpliant.binary.getsize(); i++) {
+//						if (newImpliant.binary[i] != lastImplicant2.binary[i]) {
+//							newImpliant.binary[i] = -1;
+//							break;
+//						}
+//					}
+//					newImpliant.minterms.insert(newImpliant.minterms.begin(), lastImplicant1.minterms.begin(), lastImplicant1.minterms.end());
+//					newImpliant.minterms.insert(newImpliant.minterms.begin(), lastImplicant1.minterms.begin(), lastImplicant1.minterms.end());
+//					if (!isInColumns(columns[i + 1], newImpliant)) columns[i + 1].pushBack(newImpliant);
+//				}
+//			}
+//		}
+//	}
+//}
+//template <class T, class Alloc>
+//void QM<T,Alloc>::generatePrimeImplicant() {
+//	for (auto& column : columns) {
+//		for (auto& minterm : column) {
+//			if (!minterm.isUsed) {
+//				minterm.isUsed = true;
+//				primeImplicants.pushBack(minterm);
+//			}
+//		}
+//	}
+//}
+//template <class T, class Alloc>
+//bool QM<T,Alloc>::isCoverdJustOnce(const Minterm<T,Alloc>& minterm) {
+//	int count = 0;
+//	for (auto& primeImplicant : primeImplicants) {
+//		//判断每个最小项是否只被圈过一次，如果是，那就只有两种情况，单个“1”或是单个圈，用于后续找到必要质蕴涵项
+//		if (find(primeImplicant.minterms.begin(), primeImplicant.minterms.end(), &minterm) != primeImplicant.minterms.end())count++;
+//	}
+//	return count==1;
+//}
+//template <class T, class Alloc>
+//void QM<T, Alloc>::generateEssentialPrimeImplicant() {
+//	for (auto& minterm : minterms) {
+//		if (isCoverdJustOnce(minterm)) {
+//			for (auto& primeImplicant : primeImplicants) {
+//				if (find(primeImplicant.minterms.begin(), primeImplicant.minterms.end(), &minterm) != primeImplicant.minterms.end()) {
+//					if (!primeImplicant.isUsed) {
+//						primeImplicant.isUsed = true;
+//						essentialImplicants.pushBack(primeImplicant);
+//					}
+//					break;
+//				}
+//			}
+//		}
+//	}
+//}
+//template <class T, class Alloc>
+//void QM<T, Alloc>::removeCoverdMinterms() {
+//	for (auto& essentialImplicant : essentialImplicants) {
+//		for (auto& minterm : essentialImplicant.minterms) {
+//			minterm->isCoverd = true;
+//		}
+//	}
+//}
+//template <class T, class Alloc>
+//void QM<T, Alloc>::extractEssentialPrimeImplicant() {
+//	generateEssentialPrimeImplicant();
+//	while (true) {
+//		removeCoverdMinterms();
+//		int maxNumber = 0;
+//		Implicant* newImplicant = nullptr;
+//		for (auto& primeImplicant : primeImplicants) {
+//			if (!primeImplicant.isUsed) {
+//				int minNumber = 0;
+//				for (auto& minterm : primeImplicant.minterms) {
+//					if (!minterm->isCoverd) minNumber++;
+//				}
+//				if (minNumber > maxNumber){
+//					maxNumber=minNumber;
+//					newImplicant = &primeImplicant;
+//					}
+//			}
+//		}
+//		if (!maxNumber)break;
+//		newImplicant->isUsed = true;
+//		essentialImplicants.pushBack(*newImplicant);
+//	}
+//}
+//template <class T, class Alloc>
+//void QM<T, Alloc>::result() {
+//	cout << "初化简结果为：" << endl;
+//	for (auto& primeImplicant : primeImplicants) {
+//		primeImplicant.print();
+//	}
+//	cout << "最终化简结果为：" << endl;
+//	for (auto& essentialImplicant : essentialImplicants) {
+//		essentialImplicant.print();
+//	}
+//}
+//template <class T, class Alloc>
+//void QM<T, Alloc>::run() {
+//	addData();
+//	initializeColumn();
+//	simplifyColumns();
+//	generatePrimeImplicant();
+//	extractEssentialPrimeImplicant();
+//	result();
+//}
 int main() {
 	QM<double> qm;
 	qm.run();
