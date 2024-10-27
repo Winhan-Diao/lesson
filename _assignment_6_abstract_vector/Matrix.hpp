@@ -1,103 +1,80 @@
-#pragma
+#pragma once
 #include<iostream>
 #include<cstdlib>
 #include<iomanip>
-//#include"Vector.h"
+#include"MathVector.hpp"
 using std::cout;
 using std::endl;
 using std::cin;
 using std::setw;
 
 template<class T>
-class Matrix//:public Vector
+class Matrix
 {
 //private:
 public:
-	int m=0;//¾ØÕóĞĞÊı£¨ĞĞÏòÁ¿¸öÊı£©
-	int n=0;//¾ØÕóÁĞÊı£¨ĞĞÏòÁ¿·ÖÁ¿¸öÊı£©
-	T** matrix_ptr = nullptr;
+	int m=0;//çŸ©é˜µè¡Œæ•°ï¼ˆè¡Œå‘é‡ä¸ªæ•°ï¼‰
+	int n=0;//çŸ©é˜µåˆ—æ•°ï¼ˆè¡Œå‘é‡åˆ†é‡ä¸ªæ•°ï¼‰
+	MathVector<T>* a= nullptr;
 public:
-	Matrix();//Ä¬ÈÏ¹¹Ôìº¯Êı
-	Matrix(const int& m, const int& n);//ÓĞ²Î¹¹Ôìº¯Êı
-	Matrix(const Matrix& copy);//¿½±´¹¹Ôìº¯Êı
-	~Matrix();//Îö¹¹º¯Êı
+	Matrix();//é»˜è®¤æ„é€ å‡½æ•°
+	Matrix(const int& m, const int& n);//æœ‰å‚æ„é€ å‡½æ•°
+	Matrix(const Matrix& copy);//æ‹·è´æ„é€ å‡½æ•°
+	~Matrix(){
+		delete[] a;
+	}
+	MathVector<T>& operator[](int i)const{
+		return a[i];
+	}
+	Matrix operator+(const Matrix& b)const;//çŸ©é˜µåŠ æ³•ï¼ˆå®ç°è¿åŠ ï¼‰
+	Matrix operator-(const Matrix& b)const;//çŸ©é˜µå‡æ³•ï¼ˆå®ç°è¿å‡ï¼‰
+	Matrix operator-()const;//è´ŸçŸ©é˜µ
+	Matrix operator*(const Matrix& b)const;//çŸ©é˜µä¹˜æ³•ï¼ˆå®ç°è¿ä¹˜ï¼‰
 
-	Matrix operator+(const Matrix& b)const;//¾ØÕó¼Ó·¨£¨ÊµÏÖÁ¬¼Ó£©
-	Matrix operator-(const Matrix& b)const;//¾ØÕó¼õ·¨£¨ÊµÏÖÁ¬¼õ£©
-	Matrix operator-()const;//¸º¾ØÕó
-	Matrix operator*(const Matrix& b)const;//¾ØÕó³Ë·¨£¨ÊµÏÖÁ¬³Ë£©
-
-	void show_matrix()const;//Õ¹Ê¾¾ØÕó
-	bool judge_zero_matrix()const;//ÅĞ¶ÏÊÇ·ñÎªÁã¾ØÕó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ»Øfalse£©
-	bool judge_square_matrix()const;//ÅĞ¶ÏÊÇ·ñÎª·½Õó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ»Øfalse£©
-	T determinant(T** matrix_ptr, int n)const;//Çó·½Õó¶ÔÓ¦ĞĞÁĞÊ½µÄÖµ
-	void adjugate_matrix(T** matrix_ptr, T** adjugate_matrix_ptr, int n);//Çó°éËæ¾ØÕó,½öÔÚÇó¾ØÕóµÄÄæ¾ØÕóÊ±±»µ÷ÓÃ
-	void inverse_matrix(T** matrix_ptr, double** inverse_matrix_ptr, int n);//Çó¾ØÕóµÄÄæ¾ØÕó
+	void show_matrix()const;//å±•ç¤ºçŸ©é˜µ
+	bool judge_zero_matrix()const;//åˆ¤æ–­æ˜¯å¦ä¸ºé›¶çŸ©é˜µï¼ˆæ˜¯ï¼Œè¿”å›trueï¼›å¦ï¼Œè¿”å›falseï¼‰
+	bool judge_square_matrix()const;//åˆ¤æ–­æ˜¯å¦ä¸ºæ–¹é˜µï¼ˆæ˜¯ï¼Œè¿”å›trueï¼›å¦ï¼Œè¿”å›falseï¼‰
+	T determinant(MathVector<T>* a, int n)const;//æ±‚æ–¹é˜µå¯¹åº”è¡Œåˆ—å¼çš„å€¼
+	void adjugate_matrix(MathVector<T>* a, Matrix<T>& adjugate_matrix_ptr, int n);//æ±‚ä¼´éšçŸ©é˜µ,ä»…åœ¨æ±‚çŸ©é˜µçš„é€†çŸ©é˜µæ—¶è¢«è°ƒç”¨
+	Matrix<double> inverse_matrix();//æ±‚çŸ©é˜µçš„é€†çŸ©é˜µ,æ’ä¸ºdoubleç±»å‹
 };
-template<class T> std::ostream& operator<<(std::ostream& out, const Matrix<T>& b);//ÔËËã·û<<ÖØÔØ
+template<class T> std::ostream& operator<<(std::ostream& out, const Matrix<T>& b);//è¿ç®—ç¬¦<<é‡è½½
 
 template<class T>
-Matrix<T>::Matrix()//Ä¬ÈÏ¹¹Ôìº¯Êı
+Matrix<T>::Matrix()//é»˜è®¤æ„é€ å‡½æ•°
 {
 	m = 0;
 	n = 0;
-	matrix_ptr = new  T*;
-	matrix_ptr[m] = new T[n];
-	matrix_ptr[m][n] = 0;
 }
 
 template<class T>
-Matrix<T>::Matrix(const int& m, const int& n)//ÓĞ²Î¹¹Ôìº¯Êı
+Matrix<T>::Matrix(const int& r, const int& c):m(r),n(c)//æœ‰å‚æ„é€ å‡½æ•°
 {
-	//ÒÔn×÷ÎªĞĞÏòÁ¿·ÖÁ¿¸öÊı£¬Í¨¹ıµ÷ÓÃÏòÁ¿ÀàÖĞµÄËæ»úÉú³ÉÏòÁ¿º¯Êı£¬
-	// Ëæ»ú´´½¨m¸öÀàËÆÏòÁ¿£¬²¢½«Êı¾İÒÀ´Î´«Èëmatrix¶şÎ¬Êı×éÖĞ
-	this->m = m;
-	this->n = n;
-	matrix_ptr = new T * [m];
-	for (int i = 0; i < m; i++)
-	{
-		matrix_ptr[i] = new T[n];
-	}
-	for (int i = 0; i < m; i++)
-	{
-		for (int j = 0; j < n; j++)
-		{
-			matrix_ptr[i][j] = rand() % 10 + 1;
-		}
-	}
+	a=new MathVector<T>[r];
+	for(int i=0;i<r;i++) a[i].resize(c);
 }
 
 template<class T>
-Matrix<T>::Matrix(const Matrix<T>& copy)//¿½±´¹¹Ôìº¯Êı
+Matrix<T>::Matrix(const Matrix<T>& copy)//æ‹·è´æ„é€ å‡½æ•°
 {
 	this->m = copy.m;
 	this->n = copy.n;
-	this->matrix_ptr = new T * [m];
+	this->a =new MathVector<T>[this->m];
 	for (int i = 0; i < m; i++)
 	{
-		matrix_ptr[i] = new T[n];
+		a[i].resize(n);
 	}
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			matrix_ptr[i][j] = copy.matrix_ptr[i][j];
+			a[i][j] = copy[i][j];
 		}
 	}
 }
 
 template<class T>
-Matrix<T>::~Matrix()//Îö¹¹º¯Êı
-{
-	for (int i = 0; i < m; i++)
-	{
-		delete[] matrix_ptr[i];
-	}
-	delete[] matrix_ptr;
-}
-
-template<class T>
-Matrix<T> Matrix<T>::operator+(const Matrix<T>& b)const//¾ØÕó¼Ó·¨£¨ÊµÏÖÁ¬¼Ó£©
+Matrix<T> Matrix<T>::operator+(const Matrix<T>& b)const//çŸ©é˜µåŠ æ³•ï¼ˆå®ç°è¿åŠ ï¼‰
 {
 	if (this->judge_zero_matrix())
 	{
@@ -113,18 +90,18 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T>& b)const//¾ØÕó¼Ó·¨£¨ÊµÏÖÁ¬¼Ó£©
 		for (int i=0; i < m; i++)
 			for (int j=0; j < n; j++)
 			{
-				temp.matrix_ptr[i][j] = this->matrix_ptr[i][j] + b.matrix_ptr[i][j];
+				temp[i][j] = this->a[i][j] + b[i][j];
 			}
 		return temp;
 	}
 }
 
 template<class T>
-Matrix<T> Matrix<T>::operator-(const Matrix<T>& b)const//¾ØÕó¼õ·¨£¨ÊµÏÖÁ¬¼õ£©
+Matrix<T> Matrix<T>::operator-(const Matrix<T>& b)const//çŸ©é˜µå‡æ³•ï¼ˆå®ç°è¿å‡ï¼‰
 {
 	if (this->judge_zero_matrix())
 	{
-		return -b;//µ÷ÓÃoperator-µÄÖØÔØº¯Êı
+		return -b;//è°ƒç”¨operator-çš„é‡è½½å‡½æ•°
 	}
 	else if (b.judge_zero_matrix())
 	{
@@ -136,25 +113,25 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T>& b)const//¾ØÕó¼õ·¨£¨ÊµÏÖÁ¬¼õ£©
 		for (int i = 0; i < m; i++)
 			for (int j = 0; j < n; j++)
 			{
-				temp.matrix_ptr[i][j] = this->matrix_ptr[i][j] - b.matrix_ptr[i][j];
+				temp[i][j] = this->a[i][j] - b[i][j];
 			}
 		return temp;
 	}
 }
 
 template<class T>
-Matrix<T> Matrix<T>::operator-()const//¸º¾ØÕó
+Matrix<T> Matrix<T>::operator-()const//è´ŸçŸ©é˜µ
 {
 	for (int i = 0; i < m; i++)
 		for (int j = 0; j < n; j++)
 		{
-			this->matrix_ptr[i][j] = -(this->matrix_ptr[i][j]);
+			this->a[i][j] = -(this->a[i][j]);
 		}
 	return *this;
 }
 
 template<class T>
-Matrix<T> Matrix<T>::operator*(const Matrix& b)const//¾ØÕó³Ë·¨£¨ÊµÏÖÁ¬³Ë£©
+Matrix<T> Matrix<T>::operator*(const Matrix& b)const//çŸ©é˜µä¹˜æ³•ï¼ˆå®ç°è¿ä¹˜ï¼‰
 {
 	if (this->judge_zero_matrix())
 	{
@@ -168,51 +145,33 @@ Matrix<T> Matrix<T>::operator*(const Matrix& b)const//¾ØÕó³Ë·¨£¨ÊµÏÖÁ¬³Ë£©
 	}
 	else if (this->n != b.m)
 	{
-		cout << "²»·ûºÏ¾ØÕó³Ë·¨¶¨Òå£¡" << endl;
+		cout << "cannot times" << endl;
 		return *this;
 	}
 	else
 	{
-		int index = 0;
-		T* multiply = new T[(this->m) * (b.n)];
-		for (int i = 0; i < (this->m) * (b.n); i++)
-		{
-			multiply[i] = 0;
-		}
-		Matrix<T> temp(this->m, b.n);
-		for (int i = 0; i < temp.m; i++)
-		{
-			for (int j = 0; j < temp.n; j++)
+		Matrix<T> temp(this->m,b.n);
+		for (int i = 0; i < this->m; i++)
+			for (int j = 0; j < b.n; j++)
 			{
 				for (int k = 0; k < this->n; k++)
 				{
-					multiply[index] += this->matrix_ptr[i][k] * b.matrix_ptr[k][j];
+					temp[i][j] += this->a[i][k] * b[k][j];
 				}
-				index++;
 			}
-		}
-		int time = 0;
-		for (int i = 0; i < temp.m; i++)
-		{
-			for (int j = 0; j < temp.n; j++)
-			{
-				temp.matrix_ptr[i][j] = multiply[j + time * temp.n];
-			}
-			time++;
-		}
 		return temp;
 	}
 }
 
 template<class T>
-std::ostream& operator<<(std::ostream& out, const Matrix<T>& b)//ÔËËã·û<<ÖØÔØ
+std::ostream& operator<<(std::ostream& out, const Matrix<T>& b)//è¿ç®—ç¬¦<<é‡è½½
 {
 	b.show_matrix();
 	return out;
 }
 
 template<class T>
-void Matrix<T>::show_matrix()const//Õ¹Ê¾¾ØÕó
+void Matrix<T>::show_matrix()const//å±•ç¤ºçŸ©é˜µ
 {
 	if (m == 0 || n == 0)
 	{
@@ -225,15 +184,15 @@ void Matrix<T>::show_matrix()const//Õ¹Ê¾¾ØÕó
 		cout << "(";
 		for (int j = 0; j < n - 1; j++)
 		{
-			cout << setw(2)<<matrix_ptr[i][j] << " ";
+			cout << setw(2)<<a[i][j] << " ";
 		}
-		cout << setw(2) << matrix_ptr[i][n - 1] << setw(2) << ")" << endl;
+		cout << setw(2) << a[i][n - 1] << setw(2) << ")" << endl;
 	}
 	cout << endl;
 }
 
 template<class T>
-bool Matrix<T>::judge_zero_matrix()const//ÅĞ¶ÏÊÇ·ñÎªÁã¾ØÕó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ»Øfalse£©
+bool Matrix<T>::judge_zero_matrix()const//åˆ¤æ–­æ˜¯å¦ä¸ºé›¶çŸ©é˜µï¼ˆæ˜¯ï¼Œè¿”å›trueï¼›å¦ï¼Œè¿”å›falseï¼‰
 {
 	if (this->m == 0 || this->n == 0)
 		return true;
@@ -242,7 +201,7 @@ bool Matrix<T>::judge_zero_matrix()const//ÅĞ¶ÏÊÇ·ñÎªÁã¾ØÕó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ
 }
 
 template<class T>
-bool Matrix<T>::judge_square_matrix()const//ÅĞ¶ÏÊÇ·ñÎª·½Õó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ»Øfalse£©
+bool Matrix<T>::judge_square_matrix()const//åˆ¤æ–­æ˜¯å¦ä¸ºæ–¹é˜µï¼ˆæ˜¯ï¼Œè¿”å›trueï¼›å¦ï¼Œè¿”å›falseï¼‰
 {
 	if (this->m == this->n)
 		return true;
@@ -251,51 +210,48 @@ bool Matrix<T>::judge_square_matrix()const//ÅĞ¶ÏÊÇ·ñÎª·½Õó£¨ÊÇ£¬·µ»Øtrue£»·ñ£¬·µ
 }
 
 template<class T>
-T Matrix<T>::determinant(T** matrix_ptr, int n)const//Çó·½Õó¶ÔÓ¦ĞĞÁĞÊ½µÄÖµ
+T Matrix<T>::determinant(MathVector<T>* a, int n)const//æ±‚æ–¹é˜µå¯¹åº”è¡Œåˆ—å¼çš„å€¼
 {
 	if (n == 1)
 	{
-		return matrix_ptr[0][0];
+		return a[0][0];
 	}
-	else if (n == 2)//µİ¹éÖÕµã£¨Èôn>=3£©
+	else if (n == 2)//é€’å½’ç»ˆç‚¹ï¼ˆè‹¥n>=3ï¼‰
 	{
-		return matrix_ptr[0][0] * matrix_ptr[1][1] - matrix_ptr[0][1] * matrix_ptr[1][0];
+		return a[0][0] * a[1][1] - a[0][1] * a[1][0];
 	}
 	else
 	{
 		T matrix_ptr_value = 0;
 		for (int k = 0; k < n; k++)
 		{
-			T** matrix_ptr_temp = new T * [n - 1];//ĞĞÁĞÊ½Ã¿Ò»ĞĞµÚÒ»¸öÔªËØ£¬¹¹³ÉÒ»¸öÁĞÏòÁ¿
-			int i2 = 1;//¸ù¾İµÚ0ĞĞµÚjÁĞÕ¹¿ª£¬Ô­±¾µÄĞĞÁĞÊ½Ö±½Ó´ÓµÚÒ»ĞĞ¿ªÊ¼¿½±´
-			for (int i1 = 0; i1 < n - 1; i1++)//ĞÂ´´½¨Ò»¸ö¶¯Ì¬¶şÎ¬Êı×é£¬ÓÃÓÚ´æ´¢£¬ÉÏÒ»´Î¾ØÕó³ıÈ¥Ò»ĞĞÒ»ÁĞÔªËØºó£¬µÄËùÓĞÊı¾İ
+			MathVector<T>* matrix_ptr_temp = new MathVector<T>[n - 1];//è¡Œåˆ—å¼æ¯ä¸€è¡Œç¬¬ä¸€ä¸ªå…ƒç´ ï¼Œæ„æˆä¸€ä¸ªåˆ—å‘é‡
+			int i2 = 1;//æ ¹æ®ç¬¬0è¡Œç¬¬jåˆ—å±•å¼€ï¼ŒåŸæœ¬çš„è¡Œåˆ—å¼ç›´æ¥ä»ç¬¬ä¸€è¡Œå¼€å§‹æ‹·è´
+			for (int i1 = 0; i1 < n - 1; i1++)//æ–°åˆ›å»ºä¸€ä¸ªåŠ¨æ€äºŒç»´æ•°ç»„ï¼Œç”¨äºå­˜å‚¨ï¼Œä¸Šä¸€æ¬¡çŸ©é˜µé™¤å»ä¸€è¡Œä¸€åˆ—å…ƒç´ åï¼Œçš„æ‰€æœ‰æ•°æ®
 			{
-				matrix_ptr_temp[i1] = new T[n - 1];//ĞĞÁĞÊ½µÚÒ»ĞĞ
+				matrix_ptr_temp[i1] .resize(n-1) ;//è¡Œåˆ—å¼ç¬¬ä¸€è¡Œ
 				int j2 = 0;
 				for (int j1 = 0; j1 < n - 1; j1++)
 				{
 					if (j2 == k)
 					{
 						j2++;
-					}//È¥³ıµÚjÁĞ
-					matrix_ptr_temp[i1][j1] = matrix_ptr[i2][j2++];//¸³Öµ¸øĞÂµÄ¶şÎ¬Êı×é
+					}//å»é™¤ç¬¬jåˆ—
+					matrix_ptr_temp[i1][j1] = a[i2][j2++];//èµ‹å€¼ç»™æ–°çš„äºŒç»´æ•°ç»„
 				}
 				i2++;
 			}
-			matrix_ptr_value += ((k & 0x0001) ? (-1) : 1) * matrix_ptr[0][k] * determinant(matrix_ptr_temp, n - 1);//¼ÆËã´úÊıÓà×ÓÊ½Óë¶ÔÓ¦ÏîµÄ³Ë»ı,²¢½øĞĞº¯Êıµü´ú
+			matrix_ptr_value += ((k & 0x0001) ? (-1) : 1) * a[0][k] * determinant(matrix_ptr_temp, n - 1);//è®¡ç®—ä»£æ•°ä½™å­å¼ä¸å¯¹åº”é¡¹çš„ä¹˜ç§¯,å¹¶è¿›è¡Œå‡½æ•°è¿­ä»£
+			delete[] matrix_ptr_temp;
 		}
 		return matrix_ptr_value;
 	}
 }
 
 template<class T>
-void Matrix<T>::adjugate_matrix(T** matrix_ptr, T** adjugate_matrix_ptr, int n)//Çó°éËæ¾ØÕó
+void Matrix<T>::adjugate_matrix(MathVector<T>* a, Matrix<T>& adjugate_matrix_ptr, int n)//æ±‚ä¼´éšçŸ©é˜µ
 {
-	T** matrix_for_algebraic_cofactor = new T * [n - 1];//ÔİÊ±´æ·Å´úÊıÓà×ÓÊ½µÄ¾ØÕó
-	for (int i = 0; i < n - 1; i++)
-	{
-		matrix_for_algebraic_cofactor[i] = new T[n - 1];//³õÊ¼»¯·ÖÅä¿Õ¼ä
-	}
+	Matrix<T> matrix_for_algebraic_cofactor(n-1,n-1); //æš‚æ—¶å­˜æ”¾ä»£æ•°ä½™å­å¼çš„çŸ©é˜µ
 	for (int x = 0; x < n; x++)
 	{
 		for (int y = 0; y < n; y++)
@@ -314,42 +270,38 @@ void Matrix<T>::adjugate_matrix(T** matrix_ptr, T** adjugate_matrix_ptr, int n)/
 					{
 						j1++;
 					}
-					matrix_for_algebraic_cofactor[i][j] = matrix_ptr[i1][j1++];
+					matrix_for_algebraic_cofactor[i][j] = a[i1][j1++];
 				}
 				i1++;
-			}//ÊµÏÖÁË×ªÖÃ
-			adjugate_matrix_ptr[y][x] = ((x + y) & 0x0001 ? (-1) : 1) * determinant(matrix_for_algebraic_cofactor, n - 1);
+			}//å®ç°äº†è½¬ç½®
+			adjugate_matrix_ptr[y][x] = ((x + y) & 0x0001 ? (-1) : 1) * determinant(matrix_for_algebraic_cofactor.a, n - 1);
 		}
 	}
-	for (int i = 0; i < n - 1; i++)
-	{
-		delete[] matrix_for_algebraic_cofactor[i];
-	}
-	delete[] matrix_for_algebraic_cofactor;
 }
 
 template<class T>
-void Matrix<T>::inverse_matrix(T** matrix_ptr, double** inverse_matrix_ptr, int n)
+Matrix<double> Matrix<T>::inverse_matrix()
 {
-	T determinant_value = determinant(matrix_ptr, n);
+	T determinant_value = determinant(a, n); 
+	Matrix<double> inverse_matrix_ptr(n,n);
 	if (int(determinant_value) == 0)
 	{
-		cout << "¸Ã¾ØÕó²»¿ÉÄæ!" << endl;
-		return;
+		cout << "No Inverse_matrix" << endl;
+		return inverse_matrix_ptr;
 	}
 	else 
 	{
 		if (n == 1)
 		{
-			cout << "(" << setw(2) << 1.0 / matrix_ptr[0][0] << setw(2) << ")";
-			return;
+			cout << "(" << setw(2) << 1.0 / a[0][0] << setw(2) << ")";
+			return inverse_matrix_ptr;
 		}
-		T** adjugate_matrix_ptr = new T* [n];
+		Matrix<T> adjugate_matrix_ptr(n,n);
 		for (int i = 0; i < n; i++)
 		{
-			adjugate_matrix_ptr[i] = new T[n];
+			adjugate_matrix_ptr[i].resize(n);
 		}
-		adjugate_matrix(matrix_ptr, adjugate_matrix_ptr, n);
+		adjugate_matrix(a, adjugate_matrix_ptr, n);
 		for (int i = 0; i < n; i++)
 		{
 			for (int j = 0; j < n; j++)
@@ -357,20 +309,6 @@ void Matrix<T>::inverse_matrix(T** matrix_ptr, double** inverse_matrix_ptr, int 
 				inverse_matrix_ptr[i][j] = adjugate_matrix_ptr[i][j] *1.0/ determinant_value;
 			}
 		}
-		for (int i = 0; i < n; i++)
-		{
-			cout << "(";
-			for (int j = 0; j < n - 1; j++)
-			{
-				cout << setw(10) << inverse_matrix_ptr[i][j] << " ";
-			}
-			cout << setw(10) << inverse_matrix_ptr[i][n - 1] << setw(2) << ")" << endl;
-		}
-		cout << endl;
-		for (int i = 0; i < n; i++)
-		{
-			delete[] adjugate_matrix_ptr[i];
-		}
-		delete[] adjugate_matrix_ptr;
+		return inverse_matrix_ptr;
 	}
 }
