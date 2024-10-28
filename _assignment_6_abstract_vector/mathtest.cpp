@@ -528,7 +528,7 @@ void calc_Matrix(){
 	col('b'),cout<<"输出a-b"<<endl,col('w');
 	cout<<a-b<<endl;
 	col('b'),cout<<"输出a的行列式"<<endl,col('w');
-	cout<<a.determinant(a.a,3)<<endl;
+	cout<<a.determinant(a.begin(),3)<<endl;
 	col('g');
 	cout<<"\n\t矩阵快速幂加速斐波那契数列递推"<<endl;
 	col('w');

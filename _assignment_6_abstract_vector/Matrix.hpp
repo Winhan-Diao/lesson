@@ -11,8 +11,7 @@ using std::setw;
 template<class T>
 class Matrix
 {
-//private:
-public:
+private:
 	int m=0;//矩阵行数（行向量个数）
 	int n=0;//矩阵列数（行向量分量个数）
 	MathVector<T>* a= nullptr;
@@ -28,6 +27,9 @@ public:
 	}
 	~Matrix(){
 		delete[] a;
+	}
+	MathVector<T>* begin()const{
+		return a;
 	}
 	MathVector<T>& operator[](int i)const{
 		return a[i];
