@@ -197,6 +197,7 @@ inline Matrix<T> &Matrix<T>::operator=(const Matrix<T> &copy)
 	{
 		this->a[i]=copy.a[i];
 	}
+	return *this;
 }
 template <class Ts,class T>
 Matrix<Ts> operator*(const T &b, const Matrix<Ts> &a)
