@@ -36,7 +36,15 @@ public:
 	Matrix operator-(const Matrix& b)const;//矩阵减法（实现连减）
 	Matrix operator-()const;//负矩阵
 	Matrix operator*(const Matrix& b)const;//矩阵乘法（实现连乘）
+	template<class Tb> Matrix<T> operator*(const Tb& b)const;//矩阵数乘
+	template<class Ts,class Tb> friend Matrix<Ts> operator*(const Tb &b,const Matrix<Ts>& a);
+	Matrix<T>& operator=(const Matrix<T>& copy);//拷贝赋值运算符
 
+	void Rand(){
+		for(int i=0;i<m;i++) a[i].Rand();//随机生成矩阵a[i]
+	}
+	template<class Ts> friend void transpose(Matrix<Ts>& mat);//矩阵转置
+	Matrix<T> transpose()const;
 	void show_matrix()const;//展示矩阵
 	bool judge_zero_matrix()const;//判断是否为零矩阵（是，返回true；否，返回false）
 	bool judge_square_matrix()const;//判断是否为方阵（是，返回true；否，返回false）
@@ -128,12 +136,10 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T>& b)const//矩阵减法（实现�
 template<class T>
 Matrix<T> Matrix<T>::operator-()const//负矩阵
 {
+	Matrix<T> temp(*this);
 	for (int i = 0; i < m; i++)
-		for (int j = 0; j < n; j++)
-		{
-			this->a[i][j] = -(this->a[i][j]);
-		}
-	return *this;
+		temp[i]=-temp[i];
+	return temp;
 }
 
 template<class T>
@@ -168,20 +174,75 @@ Matrix<T> Matrix<T>::operator*(const Matrix& b)const//矩阵乘法（实现连�
 		return temp;
 	}
 }
+template <class T>
+template <class Tb>
+inline Matrix<T> Matrix<T>::operator*(const Tb &b) const
+{
+	Matrix<T> temp=*this;
+	for(int i=0;i<this->m;i++){
+		temp[i]*=b;
+	}
+	return temp;	
+}
+template <class T>
+inline Matrix<T> &Matrix<T>::operator=(const Matrix<T> &copy)
+{
+	if (this == &copy)
+		return *this;
+	this->m = copy.m;
+	this->n = copy.n;
+	delete[] this->a;
+	this->a = new MathVector<T>[this->m];
+	for (int i = 0; i < this->m; i++)
+	{
+		this->a[i]=copy.a[i];
+	}
+}
+template <class Ts,class T>
+Matrix<Ts> operator*(const T &b, const Matrix<Ts> &a)
+{
+	return a*b;
+}
+template <class T>
+inline void transpose(Matrix<T> &mat)
+{
+	Matrix<T> temp(mat.n,mat.m);
+	for(int i=0;i<mat.m;i++){
+		for(int j=0;j<mat.n;j++){
+			temp[j][i]=mat[i][j];
+		}
+	}
+	delete []mat.a;
+	mat.m=temp.m,mat.n=temp.n;
+	mat.a=new MathVector<T>[mat.m];
+	for(int i=0;i<mat.m;i++) mat[i]=temp[i];
+}
 
-template<class T>
-std::ostream& operator<<(std::ostream& out, const Matrix<T>& b)//运算符<<重载
+template <class T>
+std::ostream &operator<<(std::ostream &out, const Matrix<T> &b) // 运算符<<重载
 {
 	b.show_matrix();
 	return out;
 }
 
-template<class T>
-void Matrix<T>::show_matrix()const//展示矩阵
+template <class T>
+inline Matrix<T> Matrix<T>::transpose() const
+{
+	Matrix<T> temp(n,m);
+	for(int i=0;i<m;i++){
+		for(int j=0;j<n;j++){
+			temp[j][i]=a[i][j];
+		}
+	}
+	return temp;
+}
+
+template <class T>
+void Matrix<T>::show_matrix() const // 展示矩阵
 {
 	if (m == 0 || n == 0)
 	{
-		cout << "(" << setw(2) << 0 << setw(2) << ")" << endl;
+		cout << "(" << setw(2) << ' ' << setw(2) << ")" << endl;
 		cout << endl;
 		return;
 	}
@@ -190,9 +251,10 @@ void Matrix<T>::show_matrix()const//展示矩阵
 		cout << "(";
 		for (int j = 0; j < n - 1; j++)
 		{
-			cout << setw(2)<<a[i][j] << " ";
+			fabs(a[i][j])<1e-6?cout << setw(2) << 0 << setw(2) << " ":cout << setw(2) << a[i][j] << setw(2) << " ";
 		}
-		cout << setw(2) << a[i][n - 1] << setw(2) << ")" << endl;
+		fabs(a[i][n-1])<1e-6?cout << setw(2) << 0 << setw(2) << ")":cout << setw(2) << a[i][n - 1] << setw(2) << ")";
+		cout << endl;
 	}
 	cout << endl;
 }
@@ -318,3 +380,5 @@ Matrix<double> Matrix<T>::inverse_matrix()
 		return inverse_matrix_ptr;
 	}
 }
+
+

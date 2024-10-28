@@ -14,26 +14,15 @@ int Choice(const char *prompt, const char *options);
 void IN_test();
 void constructors_test();
 void calc_test();
+void IN_Matrix();
+void constructors_Matrix();
+void calc_Matrix();
+template<class T> Matrix<T>qkpow(Matrix<T>& a,int k);
 int main(){
 	// freopen("s.txt","w",stdout);
-	Matrix<double> a(3, 3);
-	MathVector<int> v1(3,1);
-	Matrix<int> c=v1;
-	cout<<c;
-	for(int i=0;i<3;i++){
-		for(int j=0;j<3;j++){
-			if(i==j) a[i][j]=i+1;
-		}
-	}
-	Matrix<double> b=a.inverse_matrix();
-	a.show_matrix();
-	b.show_matrix();
-	cout<<a.determinant(a.a,3)<<endl;
-	cout<<a*b<<endl;
-	cout<<a+b<<endl;
-	cout<<a-b<<endl;
-	system("pause");
+	srand(time(0));
 	test_MathVector();
+	test_Matrix();
 	return 0;
 }
 
@@ -80,7 +69,7 @@ int Choice(const char *prompt, const char *options)		// 函数定义。
 void test_MathVector(){
 	while(1){
 		col('g');
-		cout<<"\n\t输入任意键继续测试,输入ESC退出测试!"<<endl;
+		cout<<"\n\t数字向量测试：输入任意键继续测试,输入ESC退出测试!"<<endl;
 		col('w');
 		cout << "1 --- 输入向量测试" << endl;
 		cout << "2 --- 构造函数测试" << endl;
@@ -91,7 +80,7 @@ void test_MathVector(){
 		{
 		case '1':{
 			col('b');
-			cout<<"\n\t\t输入向量测试"<<endl;
+			cout<<"\n\t\t输入测试"<<endl;
 			col('w');
 			IN_test();
 			break;
@@ -115,6 +104,46 @@ void test_MathVector(){
 		}
 	}
 }
+
+void test_Matrix(){
+	while(1){
+		col('b');
+		cout<<"\n\t矩阵测试：输入任意键继续测试,输入ESC退出测试!"<<endl;
+		col('w');
+		cout << "1 --- 输入测试" << endl;
+		cout << "2 --- 构造函数测试" << endl;
+		cout << "3 --- 运算符测试" << endl;
+		int key=Choice("\n请选择", "123\x1b");
+		if(key==27)break;
+		switch (key)
+		{
+		case '1':{
+			col('b');
+			cout<<"\n\t\t输入测试"<<endl;
+			col('w');
+			IN_Matrix();
+			break;
+		}
+		case '2':{
+			col('b');
+			cout<<"\n\t\t构造函数测试"<<endl;
+			col('w');	
+			constructors_Matrix();
+			break;
+		}
+		case '3':{
+			col('b');
+			cout<<"\n\t\t运算符测试"<<endl;
+			col('w');
+			calc_Matrix();
+			break;
+		}
+		default:
+			break;
+		}
+	}	
+}
+
 //内置cin>>是比较繁琐的,因为不得不在输入时给予用户提示信息
 //如果不提供提示信息又容易导致错误的输入理解，故留给用户自行使用下标引用输入修改
 void IN_test(){
@@ -424,4 +453,93 @@ void calc_test(){
 	col('g'),
 	cout<<"\n\t~测试完成~"<<endl;
 	col('w');
+}
+
+void IN_Matrix(){
+	int n,m;
+	col(2),cout<<"请输入行列"<<endl,col(0);
+	cin>>m>>n;
+	Matrix<double> a(m,n);
+	for(int i=0;i<m;i++){
+		for(int j=0;j<n;j++){
+			cin>>a[i][j];
+		}
+	}
+	cout<<a<<endl;
+	std::cin.clear(); // 清除错误状态
+	std::fflush(stdin);		//防止多输入从而影响其它测试进程。
+}
+void constructors_Matrix()
+{
+	Matrix<double> a(3,3);
+	MathVector<int> v1(3,1);
+	Matrix<int> c=v1;
+	for(int i=0;i<3;i++){
+		for(int j=0;j<3;j++){
+			if(i==j) a[i][j]=i+1;
+		}
+	}
+	Matrix<double> b=a.inverse_matrix();
+	col('b'),cout<<"输出一般参数构造方阵a"<<endl,col('w');
+	cout<<a<<endl;
+	col('b'),cout<<"输出拷贝构造b=inv(a)"<<endl,col('w');
+	cout<<b<<endl;
+	col('b'),cout<<"输出特殊构造c=v1"<<endl,col('w');
+	cout<<c<<endl;
+	col('b'),cout<<"输出转置c.transpose()"<<endl,col('w');
+	cout<<c.transpose()<<endl;
+	col('b'),cout<<"输出转置后的c"<<endl,col('w');
+	transpose(c);
+	cout<<c<<endl;
+}
+
+template<class T>
+Matrix<T> qkpow(Matrix<T>&a ,int k){
+	Matrix<T> ans=a,p=a;
+	while(k){
+		if(k&1) ans=ans*p;
+		p=p*p;
+		k>>=1;
+	}
+	return ans;
+}
+void calc_Matrix(){
+	Matrix<double> a(3,3);
+	cout<<"a的随机化"<<endl;
+	a.Rand();
+	col('b'),cout<<"输出随机生成的方阵a"<<endl,col('w');
+	cout<<a<<endl;
+	for(int i=0;i<3;i++) for(int j=0;j<3;j++) i==j?a[i][j]=i+1:a[i][j]=0;
+	col('b'),cout<<"特殊构造的方阵a"<<endl,col('w');
+	cout<<a<<endl;
+	Matrix<double>b=a.inverse_matrix();
+	Matrix<double> c=a;
+	col('b'),cout<<"输出a的逆矩阵b"<<endl,col('w');
+	cout<<b<<endl;
+	col('b'),cout<<"输出-a"<<endl,col('w');
+	cout<<-c<<endl;
+	col('b'),cout<<"输出a*b"<<endl,col('w');
+	cout<<a*b<<endl;
+	col('b'),cout<<"输出a*2和2*a"<<endl,col('w');
+	cout<<a*2<<endl;
+	cout<<2*a<<endl;
+	col('b'),cout<<"输出a+b"<<endl,col('w');
+	cout<<a+b<<endl;
+	col('b'),cout<<"输出a-b"<<endl,col('w');
+	cout<<a-b<<endl;
+	col('b'),cout<<"输出a的行列式"<<endl,col('w');
+	cout<<a.determinant(a.a,3)<<endl;
+	col('g');
+	cout<<"\n\t矩阵快速幂加速斐波那契数列递推"<<endl;
+	col('w');
+	Matrix<int> F(2,2);
+	F[0][0]=1,F[0][1]=1,F[1][0]=1,F[1][1]=0;
+	col('b'),cout<<"初始矩阵F"<<endl,col('w');
+	cout<<"(F(2) F(1))"<<endl;
+	cout<<"(F(1) F(0))"<<endl;
+	cout<<F<<endl;
+	int k=10;
+	col('b'),cout<<"F^10可以得到F[0][1]为斐波那契数列第10项的值"  <<endl,col('w');
+	F=qkpow(F,k);
+	cout<<"f(10)="<<F[0][1]<<endl;
 }
